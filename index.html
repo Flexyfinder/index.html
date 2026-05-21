@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -918,8 +919,9 @@
 <script>
 // ─── DATA ───────────────────────────────────────────────
 // ─── CONFIG ─────────────────────────────────────────────
-let SCRIPT_URL = localStorage.getItem('crm_script_url') || '';
-let USER_NAME  = localStorage.getItem('crm_user_name')  || '';
+let SUPABASE_URL  = localStorage.getItem('crm_supabase_url')  || '';
+let SUPABASE_KEY  = localStorage.getItem('crm_supabase_key')  || '';
+let USER_NAME     = localStorage.getItem('crm_user_name')     || '';
 
 let contacts = [];
 let calls = [];
@@ -929,27 +931,73 @@ let currentFollowupFilter = 'all';
 let syncTimer = null;
 let lastSyncHash = '';
 
-function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function genId() { return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
-// ─── GOOGLE SHEETS API ──────────────────────────────────
-async function apiCall(action, payload = {}) {
-  if (!SCRIPT_URL) throw new Error('No script URL configured');
-  const body = { action, userName: USER_NAME, ...payload };
-  const res = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(body)
-  });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error);
-  return json;
+// ─── SUPABASE API ────────────────────────────────────────
+function sbHeaders() {
+  return {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
 }
 
-async function loadFromSheets() {
+async function sbGet(table) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&order=created_at.asc`, { headers: sbHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbUpsert(table, rows) {
+  // Map camelCase JS fields to snake_case DB columns
+  const mapped = rows.map(r => table === 'crm_contacts' ? {
+    id: r.id, company: r.company, name: r.name, phone: r.phone,
+    email: r.email, status: r.status, industry: r.industry, notes: r.notes,
+    last_called: r.lastCalled || null, followup_date: r.followupDate || null,
+    created_at: r.createdAt || Date.now()
+  } : {
+    id: r.id, contact_id: r.contactId, created_at: r.createdAt,
+    outcome: r.outcome, notes: r.notes, followup_date: r.followupDate || null,
+    user_name: r.userName || USER_NAME
+  });
+
+  if (!mapped.length) {
+    await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=neq.null`, { method: 'DELETE', headers: sbHeaders() });
+    return;
+  }
+  await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=neq.null`, { method: 'DELETE', headers: sbHeaders() });
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: sbHeaders(),
+    body: JSON.stringify(mapped)
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
+async function sbGetContacts() {
+  const rows = await sbGet('crm_contacts');
+  return rows.map(r => ({
+    id: r.id, company: r.company, name: r.name, phone: r.phone,
+    email: r.email, status: r.status, industry: r.industry, notes: r.notes,
+    lastCalled: r.last_called, followupDate: r.followup_date, createdAt: r.created_at
+  }));
+}
+
+async function sbGetCalls() {
+  const rows = await sbGet('crm_calls');
+  return rows.map(r => ({
+    id: r.id, contactId: r.contact_id, createdAt: r.created_at,
+    outcome: r.outcome, notes: r.notes, followupDate: r.followup_date, userName: r.user_name
+  }));
+}
+
+async function loadFromSupabase() {
   setStatus('syncing');
   try {
-    const data = await apiCall('getData');
-    contacts = data.contacts || [];
-    calls    = data.calls    || [];
+    const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
+    contacts = c || [];
+    calls    = cl || [];
     lastSyncHash = JSON.stringify([contacts, calls]);
     setStatus('ok');
     renderAll();
@@ -960,10 +1008,9 @@ async function loadFromSheets() {
 }
 
 async function save() {
-  // Optimistic: push full state to sheets
   setStatus('syncing');
   try {
-    await apiCall('saveData', { contacts, calls });
+    await Promise.all([sbUpsert('crm_contacts', contacts), sbUpsert('crm_calls', calls)]);
     lastSyncHash = JSON.stringify([contacts, calls]);
     setStatus('ok');
   } catch(e) {
@@ -975,17 +1022,17 @@ async function save() {
 function startPolling() {
   if (syncTimer) clearInterval(syncTimer);
   syncTimer = setInterval(async () => {
-    if (!SCRIPT_URL) return;
+    if (!SUPABASE_URL) return;
     try {
-      const data = await apiCall('getData');
-      const hash = JSON.stringify([data.contacts, data.calls]);
+      const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
+      const hash = JSON.stringify([c, cl]);
       if (hash !== lastSyncHash) {
-        contacts = data.contacts || [];
-        calls    = data.calls    || [];
+        contacts = c || [];
+        calls    = cl || [];
         lastSyncHash = hash;
         renderAll();
         if (currentContactId) openDetail(currentContactId);
-        showToast('🔄 CRM updated by another user');
+        showToast('🔄 CRM uppdaterad av en kollega');
       }
     } catch {}
   }, 30000);
@@ -995,10 +1042,10 @@ function setStatus(state, msg) {
   const el = document.getElementById('syncStatus');
   if (!el) return;
   const map = {
-    ok:      { color: 'var(--green)',  text: '● synced' },
+    ok:      { color: 'var(--green)',   text: '● synced' },
     syncing: { color: 'var(--accent2)', text: '↻ syncing…' },
-    error:   { color: 'var(--red)',    text: '✕ ' + (msg || 'error') },
-    offline: { color: 'var(--muted)',  text: '○ not connected' },
+    error:   { color: 'var(--red)',     text: '✕ ' + (msg || 'error') },
+    offline: { color: 'var(--muted)',   text: '○ not connected' },
   };
   const s = map[state] || map.offline;
   el.style.color = s.color;
@@ -1583,7 +1630,17 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 3000);
 }
 
-// ─── SETUP / CONNECT ────────────────────────────────────
+function copySql() {
+  const sql = `create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, created_at bigint);
+create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);
+alter table crm_contacts enable row level security;
+alter table crm_calls enable row level security;
+create policy "allow all" on crm_contacts for all using (true) with check (true);
+create policy "allow all" on crm_calls for all using (true) with check (true);`;
+  navigator.clipboard.writeText(sql);
+  showToast('✓ SQL kopierad!');
+}
+
 function showSetup() {
   document.getElementById('setupOverlay').style.display = 'flex';
 }
@@ -1592,42 +1649,48 @@ function hideSetup() {
   document.getElementById('setupOverlay').style.display = 'none';
 }
 
-async function connectSheets() {
-  const url  = document.getElementById('setupUrl').value.trim();
+async function connectSupabase() {
+  const url  = document.getElementById('setupUrl').value.trim().replace(/\/$/, '');
+  const key  = document.getElementById('setupKey').value.trim();
   const name = document.getElementById('setupName').value.trim();
-  if (!url || !name) { alert('Fill in both fields'); return; }
+  if (!url || !key || !name) { alert('Fyll i alla fält'); return; }
 
   const btn = document.getElementById('connectBtn');
-  btn.textContent = 'Testing…';
+  btn.textContent = 'Testar…';
   btn.disabled = true;
 
   try {
-    SCRIPT_URL = url;
-    USER_NAME  = name;
-    const data = await apiCall('getData');
-    localStorage.setItem('crm_script_url', url);
-    localStorage.setItem('crm_user_name',  name);
-    contacts = data.contacts || [];
-    calls    = data.calls    || [];
+    SUPABASE_URL = url;
+    SUPABASE_KEY = key;
+    USER_NAME    = name;
+    const [c, cl] = await Promise.all([sbGet('crm_contacts'), sbGet('crm_calls')]);
+    localStorage.setItem('crm_supabase_url', url);
+    localStorage.setItem('crm_supabase_key', key);
+    localStorage.setItem('crm_user_name',    name);
+    contacts = c  || [];
+    calls    = cl || [];
     lastSyncHash = JSON.stringify([contacts, calls]);
     hideSetup();
     renderAll();
     startPolling();
-    showToast('✓ Connected to Google Sheets!');
+    showToast('✓ Ansluten till Supabase!');
   } catch(e) {
-    alert('Connection failed: ' + e.message + '\n\nCheck that your Apps Script URL is correct and deployed as "Anyone".');
-    btn.textContent = 'Connect';
+    alert('Anslutning misslyckades: ' + e.message + '\n\nKontrollera URL och API-nyckel.');
+    btn.textContent = 'Anslut till Supabase';
     btn.disabled = false;
-    SCRIPT_URL = '';
+    SUPABASE_URL = '';
+    SUPABASE_KEY = '';
   }
 }
 
 function disconnectSheets() {
-  if (!confirm('Disconnect from Google Sheets? Your data stays in the sheet.')) return;
-  localStorage.removeItem('crm_script_url');
+  if (!confirm('Koppla bort från Supabase? Din data finns kvar i databasen.')) return;
+  localStorage.removeItem('crm_supabase_url');
+  localStorage.removeItem('crm_supabase_key');
   localStorage.removeItem('crm_user_name');
-  SCRIPT_URL = '';
-  USER_NAME  = '';
+  SUPABASE_URL = '';
+  SUPABASE_KEY = '';
+  USER_NAME    = '';
   contacts = [];
   calls    = [];
   if (syncTimer) clearInterval(syncTimer);
@@ -1636,12 +1699,12 @@ function disconnectSheets() {
 
 // ─── INIT ───────────────────────────────────────────────
 function init() {
-  if (!SCRIPT_URL || !USER_NAME) {
+  if (!SUPABASE_URL || !SUPABASE_KEY || !USER_NAME) {
     showSetup();
     setStatus('offline');
   } else {
     hideSetup();
-    loadFromSheets();
+    loadFromSupabase();
     startPolling();
   }
 }
@@ -1649,122 +1712,42 @@ init();
 </script>
 <!-- SETUP OVERLAY -->
 <div id="setupOverlay" style="display:none;position:fixed;inset:0;background:rgba(244,246,250,0.97);z-index:200;align-items:center;justify-content:center;flex-direction:column">
-  <div style="width:480px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,0.6)">
-    <div style="font-size:24px;font-weight:800;margin-bottom:4px">Connect to Google Sheets</div>
-    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2);margin-bottom:28px">Share your CRM across your whole team</div>
+  <div style="width:500px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,0.15)">
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px">Anslut till Supabase</div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2);margin-bottom:28px">Dela CRM:et med hela teamet — gratis</div>
 
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:24px;font-family:'DM Mono',monospace;font-size:11px;line-height:2;color:var(--muted2)">
-      <div style="color:var(--accent);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Setup steps (2 minutes)</div>
-      1. Open <strong style="color:var(--text)">script.google.com</strong> → New project<br>
-      2. Paste the Apps Script code (download below)<br>
-      3. Click <strong style="color:var(--text)">Deploy → New deployment → Web app</strong><br>
-      4. Set <strong style="color:var(--text)">"Who has access" = Anyone</strong><br>
-      5. Copy the Web App URL and paste it below<br>
-      6. Share the CRM HTML file with your team
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:24px;font-family:'DM Mono',monospace;font-size:11px;line-height:2.2;color:var(--muted2)">
+      <div style="color:var(--accent);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Setup (2 minuter)</div>
+      1. Gå till <strong style="color:var(--text)">supabase.com</strong> → New project<br>
+      2. Kopiera <strong style="color:var(--text)">Project URL</strong> och <strong style="color:var(--text)">anon public key</strong> (under Settings → API)<br>
+      3. Gå till <strong style="color:var(--text)">SQL Editor</strong> → klistra in SQL nedan → Run<br>
+      4. Klistra in URL + key här nedanför
     </div>
 
-    <div style="margin-bottom:14px">
-      <a href="#" onclick="downloadAppsScript()" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:12px;text-decoration:none">⬇ Download Apps Script code</a>
+    <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
+      <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
+      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);</div>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Your Name (shown in call logs)</label>
-      <input class="form-input" id="setupName" placeholder="e.g. Lars">
+      <label class="form-label">Ditt namn (visas i samtalsloggen)</label>
+      <input class="form-input" id="setupName" placeholder="t.ex. Lars">
     </div>
     <div class="form-group">
-      <label class="form-label">Google Apps Script Web App URL</label>
-      <input class="form-input" id="setupUrl" placeholder="https://script.google.com/macros/s/…/exec">
+      <label class="form-label">Supabase Project URL</label>
+      <input class="form-input" id="setupUrl" placeholder="https://xxxxxxxxxxxx.supabase.co">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Supabase Anon Public Key</label>
+      <input class="form-input" id="setupKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
     </div>
 
-    <button class="btn btn-primary" id="connectBtn" onclick="connectSheets()" style="width:100%;padding:12px;font-size:14px;margin-top:8px">Connect to Google Sheets</button>
+    <button class="btn btn-primary" id="connectBtn" onclick="connectSupabase()" style="width:100%;padding:12px;font-size:14px;margin-top:8px">Anslut till Supabase</button>
   </div>
 </div>
 
 <script>
-function downloadAppsScript() {
-  const code = `// CallTrack CRM — Google Apps Script Backend
-// Paste this in script.google.com, then Deploy > New Deployment > Web App
-// Set "Who has access" = Anyone
-
-const SHEET_NAME_CONTACTS = 'Contacts';
-const SHEET_NAME_CALLS    = 'Calls';
-
-function doPost(e) {
-  try {
-    const body   = JSON.parse(e.postData.contents);
-    const action = body.action;
-    const ss     = SpreadsheetApp.getActiveSpreadsheet();
-
-    if (action === 'getData') {
-      const contacts = sheetToObjects(ss, SHEET_NAME_CONTACTS);
-      const calls    = sheetToObjects(ss, SHEET_NAME_CALLS);
-      return json({ contacts, calls });
-    }
-
-    if (action === 'saveData') {
-      objectsToSheet(ss, SHEET_NAME_CONTACTS, body.contacts || []);
-      objectsToSheet(ss, SHEET_NAME_CALLS,    body.calls    || []);
-      return json({ ok: true });
-    }
-
-    return json({ error: 'Unknown action: ' + action });
-  } catch(err) {
-    return json({ error: err.message });
-  }
-}
-
-function doGet(e) {
-  return json({ status: 'CallTrack CRM API running' });
-}
-
-// ── Helpers ──────────────────────────────────────────────
-
-function json(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function getOrCreateSheet(ss, name) {
-  let sheet = ss.getSheetByName(name);
-  if (!sheet) sheet = ss.insertSheet(name);
-  return sheet;
-}
-
-function sheetToObjects(ss, name) {
-  const sheet = getOrCreateSheet(ss, name);
-  const data  = sheet.getDataRange().getValues();
-  if (data.length < 2) return [];
-  const headers = data[0];
-  return data.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i] === '' ? null : row[i]; });
-    return obj;
-  });
-}
-
-function objectsToSheet(ss, name, objects) {
-  const sheet = getOrCreateSheet(ss, name);
-  sheet.clearContents();
-  if (!objects || objects.length === 0) return;
-
-  const headers = Object.keys(objects[0]);
-  const rows    = objects.map(obj => headers.map(h => obj[h] === null || obj[h] === undefined ? '' : obj[h]));
-
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  if (rows.length > 0) {
-    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
-  }
-}
-`;
-  const blob = new Blob([code], { type: 'text/plain' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = 'calltrack_appsscript.gs';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-</script>
+function copySql() {</script>
 
 </body>
 </html>
