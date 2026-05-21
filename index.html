@@ -1745,7 +1745,15 @@ init();
 </div>
 
 <script>
-function copySql() {</script>
+function copySql() {
+  const sql = `create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, created_at bigint);
+create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);
+alter table crm_contacts enable row level security;
+alter table crm_calls enable row level security;
+create policy "allow all" on crm_contacts for all using (true) with check (true);
+create policy "allow all" on crm_calls for all using (true) with check (true);`;
+  navigator.clipboard.writeText(sql).then(() => showToast('✓ SQL kopierad!'));
+}
 
 </body>
 </html>
