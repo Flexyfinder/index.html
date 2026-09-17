@@ -5,8 +5,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CallTrack CRM</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #f4f6fa;
@@ -597,11 +597,16 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     Follow-ups
   </div>
+  <div class="nav-item" data-admin-only style="display:none" onclick="showPage('facebook', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    Facebook
+  </div>
 
   <div class="sidebar-bottom">
+    <div style="font-size:12px;font-weight:700;margin-bottom:4px" id="currentUserName"></div>
     <div class="stats-mini" id="sidebarStats">Loading...</div>
     <div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px" id="syncStatus">○ not connected</div>
-    <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;font-size:10px" onclick="disconnectSheets()">⚙ Change connection</button>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;font-size:10px" onclick="logout()">↪ Logga ut</button>
   </div>
 </nav>
 
@@ -738,6 +743,29 @@
       </div>
     </div>
 
+    <!-- FACEBOOK (admin only) -->
+    <div class="page" id="page-facebook">
+      <div style="margin-bottom:16px">
+        <button class="btn btn-primary" onclick="openAddFbPost()">+ Nytt inlägg</button>
+      </div>
+      <div class="table-wrap">
+        <table id="fbTable">
+          <thead>
+            <tr>
+              <th>Grupp</th>
+              <th>Datum</th>
+              <th>Inläggstext</th>
+              <th>Antal svar</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="fbBody">
+            <tr><td colspan="5"><div class="empty-state">Inga inlägg loggade än</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -785,6 +813,10 @@
         <label class="form-label">Industry</label>
         <input class="form-input" id="fIndustry" placeholder="Construction, IT, etc.">
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Behövs senast (styr uppföljningsdatum automatiskt)</label>
+      <input class="form-input" type="date" id="fNeededBy">
     </div>
     <div class="form-group">
       <label class="form-label">Notes</label>
@@ -889,6 +921,39 @@
   </div>
 </div>
 
+<!-- FACEBOOK POST MODAL -->
+<div class="modal-overlay" id="fbModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="fbModalTitle">Nytt Facebook-inlägg</span>
+      <button class="close-btn" onclick="closeModal('fbModal')">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Grupp *</label>
+        <input class="form-input" id="fbGroup" placeholder="t.ex. Byggnätverket Sverige">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Datum</label>
+        <input class="form-input" type="date" id="fbDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Inläggstext</label>
+      <textarea class="form-textarea" id="fbText" placeholder="Vad du postade..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Antal svar</label>
+      <input class="form-input" type="number" min="0" id="fbResponses" value="0">
+    </div>
+    <input type="hidden" id="fbEditId">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('fbModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFbPost()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- DETAIL PANEL -->
 <div class="detail-panel" id="detailPanel">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
@@ -917,15 +982,71 @@
   </div>
 </div>
 
+<!-- SETUP OVERLAY -->
+<div id="setupOverlay" style="display:none;position:fixed;inset:0;background:rgba(244,246,250,0.97);z-index:200;align-items:center;justify-content:center;flex-direction:column">
+  <div style="width:500px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,0.15)">
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px">Anslut till Supabase</div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2);margin-bottom:28px">Dela CRM:et med hela teamet — gratis</div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:24px;font-family:'DM Mono',monospace;font-size:11px;line-height:2.2;color:var(--muted2)">
+      <div style="color:var(--accent);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Setup</div>
+      1. Gå till <strong style="color:var(--text)">supabase.com</strong> → New project<br>
+      2. Kopiera <strong style="color:var(--text)">Project URL</strong> och <strong style="color:var(--text)">anon public key</strong> (under Settings → API)<br>
+      3. Gå till <strong style="color:var(--text)">SQL Editor</strong> → klistra in SQL nedan → Run<br>
+      4. Gå till <strong style="color:var(--text)">Authentication → Users → Add user</strong> och skapa ett konto (e-post + lösenord) per person som ska använda CRM:et<br>
+      5. Gå till <strong style="color:var(--text)">Table Editor → crm_users</strong> och lägg till en rad per konto: samma <strong style="color:var(--text)">id</strong> som i Authentication-listan, ett namn, och roll <strong style="color:var(--text)">admin</strong> eller <strong style="color:var(--text)">member</strong><br>
+      6. Klistra in URL + key här nedanför, sen loggar var och en in med sitt konto
+    </div>
+
+    <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
+      <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
+      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, needed_by text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>create table if not exists crm_users (id uuid primary key references auth.users(id) on delete cascade, name text, role text not null default 'member' check (role in ('admin','member')));<br>create table if not exists facebook_inlagg (id text primary key, group_name text, posted_at text, post_text text, response_count int default 0, created_at bigint);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>alter table crm_users enable row level security;<br>alter table facebook_inlagg enable row level security;<br>create policy "auth select contacts" on crm_contacts for select using (auth.role() = 'authenticated');<br>create policy "auth insert contacts" on crm_contacts for insert with check (auth.role() = 'authenticated');<br>create policy "auth update contacts" on crm_contacts for update using (auth.role() = 'authenticated');<br>create policy "auth delete contacts" on crm_contacts for delete using (auth.role() = 'authenticated');<br>create policy "auth select calls" on crm_calls for select using (auth.role() = 'authenticated');<br>create policy "auth insert calls" on crm_calls for insert with check (auth.role() = 'authenticated');<br>create policy "auth update calls" on crm_calls for update using (auth.role() = 'authenticated');<br>create policy "auth delete calls" on crm_calls for delete using (auth.role() = 'authenticated');<br>create policy "read own profile" on crm_users for select using (auth.uid() = id);<br>create policy "admin all fb posts" on facebook_inlagg for all using (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin')) with check (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin'));</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Supabase Project URL</label>
+      <input class="form-input" id="setupUrl" placeholder="https://xxxxxxxxxxxx.supabase.co">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Supabase Anon Public Key</label>
+      <input class="form-input" id="setupKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+    </div>
+
+    <button class="btn btn-primary" id="connectBtn" onclick="connectSupabase()" style="width:100%;padding:12px;font-size:14px;margin-top:8px">Anslut till Supabase</button>
+  </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:rgba(244,246,250,0.97);z-index:210;align-items:center;justify-content:center;flex-direction:column">
+  <div style="width:380px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,0.15)">
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px">Logga in</div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2);margin-bottom:24px">Använd kontot som skapats åt dig i Supabase</div>
+    <div class="form-group">
+      <label class="form-label">E-post</label>
+      <input class="form-input" id="loginEmail" type="email" placeholder="namn@flexyfinder.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Lösenord</label>
+      <input class="form-input" id="loginPassword" type="password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()" style="width:100%;padding:12px;font-size:14px;margin-top:8px">Logga in</button>
+    <button class="btn btn-ghost btn-sm" onclick="disconnectSheets()" style="width:100%;margin-top:10px">⚙ Byt Supabase-projekt</button>
+  </div>
+</div>
+
 <script>
 // ─── DATA ───────────────────────────────────────────────
 // ─── CONFIG ─────────────────────────────────────────────
 let SUPABASE_URL  = localStorage.getItem('crm_supabase_url')  || '';
 let SUPABASE_KEY  = localStorage.getItem('crm_supabase_key')  || '';
-let USER_NAME     = localStorage.getItem('crm_user_name')     || '';
+let USER_NAME     = '';
+let USER_ROLE     = 'member';
+let sb            = null;   // supabase-js client
+let currentUser   = null;   // logged-in auth user
 
 let contacts = [];
 let calls = [];
+let fbPosts = [];   // Facebook-inlägg — admin-only, se RLS-policy
 let currentContactId = null;
 let currentFilter = 'all';
 let currentFollowupFilter = 'all';
@@ -934,42 +1055,41 @@ let lastSyncHash = '';
 
 function genId() { return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
-// ─── SUPABASE API ────────────────────────────────────────
-let _sb = null;
-
-function getSB() {
-  if (!_sb) {
-    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  }
-  return _sb;
-}
-
+// ─── SUPABASE API (via supabase-js, respects Auth + RLS) ─
 async function sbGet(table) {
-  const { data, error } = await getSB().from(table).select('*').order('created_at');
+  const { data, error } = await sb.from(table).select('*').order('created_at', { ascending: true });
   if (error) throw new Error(error.message);
-  return data || [];
+  return data;
 }
 
-async function sbUpsert(table, rows) {
+// Upserts ONLY the rows passed in — never touches other rows.
+// This replaces the old "delete everything then reinsert everything"
+// approach, which caused data loss when two people saved at the same time.
+async function sbUpsertRows(table, rows) {
+  if (!rows.length) return;
   const mapped = rows.map(r => table === 'crm_contacts' ? {
     id: r.id, company: r.company, name: r.name, phone: r.phone,
     email: r.email, status: r.status, industry: r.industry, notes: r.notes,
     last_called: r.lastCalled || null, followup_date: r.followupDate || null,
+    needed_by: r.neededBy || null,
     created_at: r.createdAt || Date.now()
   } : {
     id: r.id, contact_id: r.contactId, created_at: r.createdAt,
     outcome: r.outcome, notes: r.notes, followup_date: r.followupDate || null,
     user_name: r.userName || USER_NAME
   });
+  const { error } = await sb.from(table).upsert(mapped, { onConflict: 'id' });
+  if (error) throw new Error(error.message);
+}
 
-  // Delete all then insert fresh
-  const { error: delErr } = await getSB().from(table).delete().neq('id', 'never-match-placeholder');
-  if (delErr && delErr.code !== 'PGRST116') throw new Error(delErr.message);
+async function sbDeleteRow(table, id) {
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
 
-  if (mapped.length) {
-    const { error: insErr } = await getSB().from(table).insert(mapped);
-    if (insErr) throw new Error(insErr.message);
-  }
+async function sbDeleteCallsForContact(contactId) {
+  const { error } = await sb.from('crm_calls').delete().eq('contact_id', contactId);
+  if (error) throw new Error(error.message);
 }
 
 async function sbGetContacts() {
@@ -977,7 +1097,8 @@ async function sbGetContacts() {
   return rows.map(r => ({
     id: r.id, company: r.company, name: r.name, phone: r.phone,
     email: r.email, status: r.status, industry: r.industry, notes: r.notes,
-    lastCalled: r.last_called, followupDate: r.followup_date, createdAt: r.created_at
+    lastCalled: r.last_called, followupDate: r.followup_date, createdAt: r.created_at,
+    neededBy: r.needed_by
   }));
 }
 
@@ -989,12 +1110,32 @@ async function sbGetCalls() {
   }));
 }
 
+async function sbGetFbPosts() {
+  const rows = await sbGet('facebook_inlagg');
+  return rows.map(r => ({
+    id: r.id, group: r.group_name, date: r.posted_at, text: r.post_text,
+    responses: r.response_count, createdAt: r.created_at
+  }));
+}
+
+async function sbUpsertFbPost(row) {
+  const mapped = {
+    id: row.id, group_name: row.group, posted_at: row.date, post_text: row.text,
+    response_count: row.responses, created_at: row.createdAt || Date.now()
+  };
+  const { error } = await sb.from('facebook_inlagg').upsert([mapped], { onConflict: 'id' });
+  if (error) throw new Error(error.message);
+}
+
 async function loadFromSupabase() {
   setStatus('syncing');
   try {
     const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
     contacts = c || [];
     calls    = cl || [];
+    if (USER_ROLE === 'admin') {
+      try { fbPosts = await sbGetFbPosts() || []; } catch(e) { fbPosts = []; }
+    }
     lastSyncHash = JSON.stringify([contacts, calls]);
     setStatus('ok');
     renderAll();
@@ -1004,15 +1145,62 @@ async function loadFromSupabase() {
   }
 }
 
-async function save() {
-  setStatus('syncing');
-  try {
-    await Promise.all([sbUpsert('crm_contacts', contacts), sbUpsert('crm_calls', calls)]);
-    lastSyncHash = JSON.stringify([contacts, calls]);
-    setStatus('ok');
-  } catch(e) {
-    setStatus('error', e.message);
+// ─── AUTH ───────────────────────────────────────────────
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  sb.auth.onAuthStateChange((event, sess) => {
+    if (event === 'SIGNED_IN' && sess) onLoggedIn(sess);
+    if (event === 'SIGNED_OUT') { currentUser = null; showLogin(); }
+  });
+  if (session) await onLoggedIn(session);
+  else showLogin();
+}
+
+function showLogin() {
+  setStatus('offline');
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+function hideLogin() {
+  document.getElementById('loginOverlay').style.display = 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { alert('Fyll i e-post och lösenord'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Loggar in…'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    alert('Inloggning misslyckades: ' + error.message);
+    btn.textContent = 'Logga in'; btn.disabled = false;
+    return;
   }
+  btn.textContent = 'Logga in'; btn.disabled = false;
+  await onLoggedIn(data.session);
+}
+
+async function onLoggedIn(session) {
+  currentUser = session.user;
+  hideLogin();
+  const { data: profile } = await sb.from('crm_users').select('*').eq('id', currentUser.id).single();
+  USER_NAME = (profile && profile.name) || currentUser.email;
+  USER_ROLE = (profile && profile.role) || 'member';
+  applyRoleVisibility();
+  await loadFromSupabase();
+  startPolling();
+}
+
+function applyRoleVisibility() {
+  document.querySelectorAll('[data-admin-only]').forEach(el => {
+    el.style.display = (USER_ROLE === 'admin') ? '' : 'none';
+  });
+  const nameEl = document.getElementById('currentUserName');
+  if (nameEl) nameEl.textContent = USER_NAME + (USER_ROLE === 'admin' ? ' · admin' : '');
+}
+
+function logout() {
+  sb.auth.signOut();
 }
 
 // Poll every 30s for other users' changes
@@ -1063,7 +1251,7 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   el.classList.add('active');
-  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups' };
+  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', facebook: 'Facebook' };
   document.getElementById('pageTitle').textContent = titles[id];
   renderAll();
 }
@@ -1075,6 +1263,7 @@ function renderAll() {
   renderCalls();
   renderFollowups();
   renderSidebarStats();
+  if (USER_ROLE === 'admin') renderFbPosts();
 }
 
 function statusBadge(s) {
@@ -1109,6 +1298,11 @@ function isOverdue(dateStr) {
 }
 
 function isToday(dateStr) { return dateStr === today(); }
+
+// Risk-flagga: X samtal loggade utan att kontakten landat i match/klar
+const RISK_CALL_THRESHOLD = 3;
+function callCountFor(contactId) { return calls.filter(c => c.contactId === contactId).length; }
+function isRisk(c) { return callCountFor(c.id) >= RISK_CALL_THRESHOLD && !['interested', 'closed'].includes(c.status); }
 
 // ─── DASHBOARD ──────────────────────────────────────────
 function renderDashboard() {
@@ -1193,7 +1387,7 @@ function renderContacts() {
       <td class="name-cell">
         <span class="company-initial" style="background:${colorFor(c.company)}20;color:${colorFor(c.company)}">${c.company[0]}</span>
         <div>
-          <div style="font-weight:600">${c.company}</div>
+          <div style="font-weight:600">${c.company} ${isRisk(c) ? '<span style="color:#dc2626;font-size:11px;font-weight:700" title="Ingen match efter ' + RISK_CALL_THRESHOLD + '+ samtal">⚠ RISK</span>' : ''}</div>
           <div style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace">${c.name || ''}</div>
         </div>
       </td>
@@ -1267,21 +1461,46 @@ function renderFollowups() {
         ${fmtDate(c.followupDate)}${isOverdue(c.followupDate) ? ' ⚠' : ''}${isToday(c.followupDate) ? '<span class="today-badge">TODAY</span>' : ''}
       </td>
       <td style="color:var(--muted2);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${lastCall ? (lastCall.notes || '—') : '—'}</td>
-      <td>${statusBadge(c.status)}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openLogCallForId('${c.id}')">📞 Call Now</button></td>
+      <td>${statusBadge(c.status)}${isRisk(c) ? ' <span style="color:#dc2626;font-size:11px;font-weight:700">⚠ RISK</span>' : ''}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openLogCallForId('${c.id}')">📞 Call Now</button>
+        ${c.email ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();mailtoUpdate('${c.id}')">✉️ Mejl</button>` : ''}
+      </td>
     </tr>`;
   }).join('');
+}
+
+// Öppnar mejlklienten med ett förifyllt uppdateringsmejl.
+// OBS: detta kräver ett klick här i CRM:et — det skickar inget automatiskt
+// i bakgrunden. Riktig obemannad automatisering kräver en serverdel
+// (se separat kommentar i chatten).
+function mailtoUpdate(contactId) {
+  const c = contacts.find(x => x.id === contactId);
+  if (!c || !c.email) return;
+  const subject = encodeURIComponent('Uppdatering om ditt personalbehov');
+  const body = encodeURIComponent(
+`Hej ${c.name || ''},
+
+Vi jobbar aktivt med att hitta rätt personal till ditt uppdrag och har ännu inte landat en match, men vi ger oss inte – vi hör av oss så fort något passande dyker upp.
+
+Vill du att vi ringer och stämmer av läget, eller är det något som ändrats i ert behov sedan sist?
+
+Vänliga hälsningar,
+${USER_NAME} / FlexyFinder`);
+  window.location.href = `mailto:${c.email}?subject=${subject}&body=${body}`;
 }
 
 // ─── SIDEBAR STATS ──────────────────────────────────────
 function renderSidebarStats() {
   const followupsDue = contacts.filter(c => c.followupDate && c.followupDate <= today()).length;
   const interested = contacts.filter(c => c.status === 'interested').length;
+  const risky = contacts.filter(isRisk).length;
   document.getElementById('sidebarStats').innerHTML = `
     contacts: <span>${contacts.length}</span><br>
     calls: <span>${calls.length}</span><br>
     interested: <span>${interested}</span><br>
-    follow-ups: <span style="color:${followupsDue > 0 ? 'var(--orange)' : 'var(--accent)'}">${followupsDue}</span>
+    follow-ups: <span style="color:${followupsDue > 0 ? 'var(--orange)' : 'var(--accent)'}">${followupsDue}</span><br>
+    risk: <span style="color:${risky > 0 ? '#dc2626' : 'var(--accent)'}">${risky}</span>
   `;
 }
 
@@ -1347,11 +1566,15 @@ function editCurrentContact() {
 function deleteCurrentContact() {
   if (!currentContactId) return;
   if (!confirm('Delete this contact and all their call logs?')) return;
-  contacts = contacts.filter(c => c.id !== currentContactId);
-  calls = calls.filter(c => c.contactId !== currentContactId);
-  save();
+  const id = currentContactId;
+  contacts = contacts.filter(c => c.id !== id);
+  calls = calls.filter(c => c.contactId !== id);
   closeDetail();
   renderAll();
+  setStatus('syncing');
+  Promise.all([sbDeleteCallsForContact(id), sbDeleteRow('crm_contacts', id)])
+    .then(() => setStatus('ok'))
+    .catch(e => setStatus('error', e.message));
 }
 
 // ─── MODALS ─────────────────────────────────────────────
@@ -1366,6 +1589,7 @@ function openAddContact() {
   document.getElementById('fEmail').value = '';
   document.getElementById('fStatus').value = 'not called';
   document.getElementById('fIndustry').value = '';
+  document.getElementById('fNeededBy').value = '';
   document.getElementById('fNotes').value = '';
   document.getElementById('fEditId').value = '';
   openModal('contactModal');
@@ -1381,9 +1605,20 @@ function openEditContact(id) {
   document.getElementById('fEmail').value = c.email || '';
   document.getElementById('fStatus').value = c.status || 'not called';
   document.getElementById('fIndustry').value = c.industry || '';
+  document.getElementById('fNeededBy').value = c.neededBy || '';
   document.getElementById('fNotes').value = c.notes || '';
   document.getElementById('fEditId').value = id;
   openModal('contactModal');
+}
+
+// Behövs senast → auto-räknat uppföljningsdatum:
+// <=2 dagar kvar: idag · <=7 dagar: imorgon · annars: om 3 dagar
+function suggestFollowup(neededBy) {
+  if (!neededBy) { const d = new Date(); d.setDate(d.getDate() + 3); return d.toISOString().slice(0, 10); }
+  const days = Math.ceil((new Date(neededBy) - new Date(today())) / 86400000);
+  if (days <= 2) return today();
+  if (days <= 7) { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); }
+  const d = new Date(); d.setDate(d.getDate() + 3); return d.toISOString().slice(0, 10);
 }
 
 function saveContact() {
@@ -1397,20 +1632,25 @@ function saveContact() {
     email: document.getElementById('fEmail').value.trim(),
     status: document.getElementById('fStatus').value,
     industry: document.getElementById('fIndustry').value.trim(),
+    neededBy: document.getElementById('fNeededBy').value || null,
     notes: document.getElementById('fNotes').value.trim(),
   };
+  let row;
   if (editId) {
     const idx = contacts.findIndex(c => c.id === editId);
     if (idx !== -1) {
       contacts[idx] = { ...contacts[idx], ...data };
+      row = contacts[idx];
       if (currentContactId === editId) openDetail(editId);
     }
   } else {
-    contacts.push({ id: genId(), createdAt: Date.now(), lastCalled: null, followupDate: null, ...data });
+    row = { id: genId(), createdAt: Date.now(), lastCalled: null, followupDate: suggestFollowup(data.neededBy), ...data };
+    contacts.push(row);
   }
-  save();
   closeModal('contactModal');
   renderAll();
+  setStatus('syncing');
+  sbUpsertRows('crm_contacts', [row]).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
 }
 
 function openLogCall(contactId) {
@@ -1443,7 +1683,8 @@ function saveCall() {
 
   const createdAt = new Date(dateStr + 'T' + (timeStr || '12:00')).getTime();
 
-  calls.push({ id: genId(), contactId, createdAt, outcome, notes, followupDate: followupDate || null });
+  const newCall = { id: genId(), contactId, createdAt, outcome, notes, followupDate: followupDate || null };
+  calls.push(newCall);
 
   // Update contact
   const idx = contacts.findIndex(c => c.id === contactId);
@@ -1454,11 +1695,14 @@ function saveCall() {
     else if (outcome !== 'follow-up') contacts[idx].followupDate = null;
   }
 
-  save();
   closeModal('callModal');
   renderAll();
-
   if (currentContactId === contactId) openDetail(contactId);
+
+  setStatus('syncing');
+  const toSync = [sbUpsertRows('crm_calls', [newCall])];
+  if (idx !== -1) toSync.push(sbUpsertRows('crm_contacts', [contacts[idx]]));
+  Promise.all(toSync).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
 }
 
 // Close modals on overlay click
@@ -1601,22 +1845,24 @@ function showImportPreview(rows) {
 function confirmImport() {
   const skipDupes = document.getElementById('importSkipDupes').checked;
   const existing = new Set(contacts.map(c => c.company.toLowerCase()));
-  let added = 0, skipped = 0;
+  const addedRows = [];
+  let skipped = 0;
 
   for (const row of importedRows) {
     if (skipDupes && existing.has(row.company.toLowerCase())) { skipped++; continue; }
-    contacts.push({ id: genId(), createdAt: Date.now(), lastCalled: null, followupDate: null, ...row });
+    const newRow = { id: genId(), createdAt: Date.now(), lastCalled: null, followupDate: null, ...row };
+    contacts.push(newRow);
+    addedRows.push(newRow);
     existing.add(row.company.toLowerCase());
-    added++;
   }
 
-  save();
   closeModal('importModal');
   resetImport();
   renderAll();
+  showToast(`✓ Imported ${addedRows.length} contacts${skipped ? ` · ${skipped} duplicates skipped` : ''}`);
 
-  // Show result toast
-  showToast(`✓ Imported ${added} contacts${skipped ? ` · ${skipped} duplicates skipped` : ''}`);
+  setStatus('syncing');
+  sbUpsertRows('crm_contacts', addedRows).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
 }
 
 function showToast(msg) {
@@ -1649,29 +1895,20 @@ function hideSetup() {
 async function connectSupabase() {
   const url  = document.getElementById('setupUrl').value.trim().replace(/\/$/, '');
   const key  = document.getElementById('setupKey').value.trim();
-  const name = document.getElementById('setupName').value.trim();
-  if (!url || !key || !name) { alert('Fyll i alla fält'); return; }
+  if (!url || !key) { alert('Fyll i alla fält'); return; }
 
   const btn = document.getElementById('connectBtn');
-  btn.textContent = 'Testar…';
+  btn.textContent = 'Ansluter…';
   btn.disabled = true;
 
   try {
     SUPABASE_URL = url;
     SUPABASE_KEY = key;
-    USER_NAME    = name;
-    _sb = null; // reset client with new credentials
-    const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true } });
     localStorage.setItem('crm_supabase_url', url);
     localStorage.setItem('crm_supabase_key', key);
-    localStorage.setItem('crm_user_name',    name);
-    contacts = c  || [];
-    calls    = cl || [];
-    lastSyncHash = JSON.stringify([contacts, calls]);
     hideSetup();
-    renderAll();
-    startPolling();
-    showToast('✓ Ansluten till Supabase!');
+    await initAuth();
   } catch(e) {
     alert('Anslutning misslyckades: ' + e.message + '\n\nKontrollera URL och API-nyckel.');
     btn.textContent = 'Anslut till Supabase';
@@ -1683,77 +1920,110 @@ async function connectSupabase() {
 
 function disconnectSheets() {
   if (!confirm('Koppla bort från Supabase? Din data finns kvar i databasen.')) return;
+  if (sb) sb.auth.signOut();
   localStorage.removeItem('crm_supabase_url');
   localStorage.removeItem('crm_supabase_key');
-  localStorage.removeItem('crm_user_name');
   SUPABASE_URL = '';
   SUPABASE_KEY = '';
   USER_NAME    = '';
+  currentUser  = null;
   contacts = [];
   calls    = [];
   if (syncTimer) clearInterval(syncTimer);
+  hideLogin();
   showSetup();
 }
 
 // ─── INIT ───────────────────────────────────────────────
+// ─── FACEBOOK POSTS (admin only) ─────────────────────────
+function renderFbPosts() {
+  const tbody = document.getElementById('fbBody');
+  if (!tbody) return;
+  if (fbPosts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Inga inlägg loggade än</div></td></tr>';
+    return;
+  }
+  const sorted = [...fbPosts].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  tbody.innerHTML = sorted.map(p => `
+    <tr>
+      <td style="font-weight:600">${p.group}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${fmtDate(p.date)}</td>
+      <td style="color:var(--muted2);font-size:12px;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.text || '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${p.responses ?? 0}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openEditFbPost('${p.id}')">✎</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteFbPost('${p.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddFbPost() {
+  document.getElementById('fbModalTitle').textContent = 'Nytt Facebook-inlägg';
+  document.getElementById('fbGroup').value = '';
+  document.getElementById('fbDate').value = today();
+  document.getElementById('fbText').value = '';
+  document.getElementById('fbResponses').value = 0;
+  document.getElementById('fbEditId').value = '';
+  openModal('fbModal');
+}
+
+function openEditFbPost(id) {
+  const p = fbPosts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('fbModalTitle').textContent = 'Redigera inlägg';
+  document.getElementById('fbGroup').value = p.group || '';
+  document.getElementById('fbDate').value = p.date || '';
+  document.getElementById('fbText').value = p.text || '';
+  document.getElementById('fbResponses').value = p.responses || 0;
+  document.getElementById('fbEditId').value = id;
+  openModal('fbModal');
+}
+
+function saveFbPost() {
+  const group = document.getElementById('fbGroup').value.trim();
+  if (!group) { alert('Gruppnamn krävs'); return; }
+  const editId = document.getElementById('fbEditId').value;
+  const data = {
+    group,
+    date: document.getElementById('fbDate').value || today(),
+    text: document.getElementById('fbText').value.trim(),
+    responses: parseInt(document.getElementById('fbResponses').value, 10) || 0
+  };
+  let row;
+  if (editId) {
+    const idx = fbPosts.findIndex(p => p.id === editId);
+    row = { ...fbPosts[idx], ...data };
+    fbPosts[idx] = row;
+  } else {
+    row = { id: genId(), createdAt: Date.now(), ...data };
+    fbPosts.push(row);
+  }
+  closeModal('fbModal');
+  renderFbPosts();
+  setStatus('syncing');
+  sbUpsertFbPost(row).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
+}
+
+function deleteFbPost(id) {
+  if (!confirm('Ta bort det här inlägget?')) return;
+  fbPosts = fbPosts.filter(p => p.id !== id);
+  renderFbPosts();
+  setStatus('syncing');
+  sbDeleteRow('facebook_inlagg', id).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
+}
+
 function init() {
-  if (!SUPABASE_URL || !SUPABASE_KEY || !USER_NAME) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
     showSetup();
     setStatus('offline');
   } else {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true } });
     hideSetup();
-    loadFromSupabase();
-    startPolling();
+    initAuth();
   }
 }
-document.addEventListener('DOMContentLoaded', init);
+init();
 </script>
-<!-- SETUP OVERLAY -->
-<div id="setupOverlay" style="display:none;position:fixed;inset:0;background:rgba(244,246,250,0.97);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 0">
-  <div style="width:500px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,0.15);margin:auto">
-    <div style="font-size:24px;font-weight:800;margin-bottom:4px">Anslut till Supabase</div>
-    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2);margin-bottom:28px">Dela CRM:et med hela teamet — gratis</div>
-
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:24px;font-family:'DM Mono',monospace;font-size:11px;line-height:2.2;color:var(--muted2)">
-      <div style="color:var(--accent);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Setup (2 minuter)</div>
-      1. Gå till <strong style="color:var(--text)">supabase.com</strong> → New project<br>
-      2. Kopiera <strong style="color:var(--text)">Project URL</strong> och <strong style="color:var(--text)">anon public key</strong> (under Settings → API)<br>
-      3. Gå till <strong style="color:var(--text)">SQL Editor</strong> → klistra in SQL nedan → Run<br>
-      4. Klistra in URL + key här nedanför
-    </div>
-
-    <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
-      <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
-      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);</div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Ditt namn (visas i samtalsloggen)</label>
-      <input class="form-input" id="setupName" placeholder="t.ex. Lars">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Supabase Project URL</label>
-      <input class="form-input" id="setupUrl" placeholder="https://xxxxxxxxxxxx.supabase.co">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Supabase API Key (anon public eller publishable key)</label>
-      <input class="form-input" id="setupKey" placeholder="eyJ... eller sb_publishable_...">
-    </div>
-
-    <button class="btn btn-primary" id="connectBtn" onclick="connectSupabase()" style="width:100%;padding:12px;font-size:14px;margin-top:8px">Anslut till Supabase</button>
-  </div>
-</div>
-
-<script>
-function copySql() {
-  const sql = `create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, created_at bigint);
-create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);
-alter table crm_contacts enable row level security;
-alter table crm_calls enable row level security;
-create policy "allow all" on crm_contacts for all using (true) with check (true);
-create policy "allow all" on crm_calls for all using (true) with check (true);`;
-  navigator.clipboard.writeText(sql).then(() => showToast('✓ SQL kopierad!'));
-}
 
 </body>
 </html>
