@@ -1338,9 +1338,16 @@ const RISK_CALL_THRESHOLD = 3;
 function callCountFor(contactId) { return calls.filter(c => c.contactId === contactId).length; }
 function isRisk(c) { return callCountFor(c.id) >= RISK_CALL_THRESHOLD && !['interested', 'closed'].includes(c.status); }
 
-// Vem ska ha äran/bonusen: säljaren som loggade FÖRSTA samtalet till kontakten
+// Vem ska ha äran/bonusen: säljaren som loggade FÖRSTA samtalet till kontakten,
+// men bara om det samtalet skedde INNAN (eller samma dag som) registreringen —
+// annars kan en säljare felaktigt få credit för en kund som registrerade sig själv.
 function attributedSeller(contactId) {
-  const contactCalls = calls.filter(c => c.contactId === contactId).sort((a, b) => a.createdAt - b.createdAt);
+  const c = contacts.find(x => x.id === contactId);
+  let contactCalls = calls.filter(cl => cl.contactId === contactId).sort((a, b) => a.createdAt - b.createdAt);
+  if (c && c.registeredAt) {
+    const cutoff = new Date(c.registeredAt + 'T23:59:59').getTime();
+    contactCalls = contactCalls.filter(cl => cl.createdAt <= cutoff);
+  }
   return contactCalls.length ? (contactCalls[0].userName || '—') : '—';
 }
 
