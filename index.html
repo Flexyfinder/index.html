@@ -1317,6 +1317,13 @@ async function onLoggedIn(session) {
   applyRoleVisibility();
   await loadFromSupabase();
   startPolling();
+  // Webbläsaren autofyller ibland sökrutan med inloggningsmejlen — rensa den defensivt.
+  setTimeout(() => {
+    const sb = document.getElementById('globalSearch');
+    if (sb) { sb.value = ''; }
+    contactSearch = '';
+    renderContacts();
+  }, 400);
 }
 
 function applyRoleVisibility() {
