@@ -842,6 +842,7 @@
           <option value="">— Okänt —</option>
           <option value="inhyrare">Inhyrare (söker personal)</option>
           <option value="uthyrare">Uthyrare (har personal att låna ut)</option>
+          <option value="both">Båda (hyr ut och hyr in)</option>
         </select>
       </div>
     </div>
@@ -1443,7 +1444,7 @@ function renderContacts() {
       <td class="name-cell">
         <span class="company-initial" style="background:${colorFor(c.company)}20;color:${colorFor(c.company)}">${c.company[0]}</span>
         <div>
-          <div style="font-weight:600">${c.company} ${c.type ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:${c.type === 'inhyrare' ? '#dbeafe' : '#dcfce7'};color:${c.type === 'inhyrare' ? '#1d4ed8' : '#15803d'}">${c.type === 'inhyrare' ? 'INHYRARE' : 'UTHYRARE'}</span>` : ''} ${isRisk(c) ? '<span style="color:#dc2626;font-size:11px;font-weight:700" title="Ingen match efter ' + RISK_CALL_THRESHOLD + '+ samtal">⚠ RISK</span>' : ''}</div>
+          <div style="font-weight:600">${c.company} ${c.type ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:${c.type === 'inhyrare' ? '#dbeafe' : c.type === 'uthyrare' ? '#dcfce7' : '#fef3c7'};color:${c.type === 'inhyrare' ? '#1d4ed8' : c.type === 'uthyrare' ? '#15803d' : '#92400e'}">${c.type === 'inhyrare' ? 'INHYRARE' : c.type === 'uthyrare' ? 'UTHYRARE' : 'BÅDA'}</span>` : ''} ${isRisk(c) ? '<span style="color:#dc2626;font-size:11px;font-weight:700" title="Ingen match efter ' + RISK_CALL_THRESHOLD + '+ samtal">⚠ RISK</span>' : ''}</div>
           <div style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace">${c.name || ''}${attributedSeller(c.id) !== '—' ? ' · ringde: ' + attributedSeller(c.id) : ''}</div>
         </div>
       </td>
@@ -1581,7 +1582,7 @@ function openDetail(id) {
   const attributed = attributedSeller(id);
   document.getElementById('dpInfo').innerHTML = `
     <div class="detail-row"><span class="key">Status</span><span class="val">${statusBadge(c.status)}</span></div>
-    <div class="detail-row"><span class="key">Typ</span><span class="val">${c.type ? (c.type === 'inhyrare' ? 'Inhyrare (söker personal)' : 'Uthyrare (har personal)') : '—'}</span></div>
+    <div class="detail-row"><span class="key">Typ</span><span class="val">${c.type === 'inhyrare' ? 'Inhyrare (söker personal)' : c.type === 'uthyrare' ? 'Uthyrare (har personal)' : c.type === 'both' ? 'Båda (hyr ut och hyr in)' : '—'}</span></div>
     <div class="detail-row"><span class="key">Phone</span><span class="val">${c.phone || '—'}</span></div>
     <div class="detail-row"><span class="key">Email</span><span class="val">${c.email || '—'}</span></div>
     <div class="detail-row"><span class="key">Last called</span><span class="val">${fmtDate(c.lastCalled) || '—'}</span></div>
