@@ -601,6 +601,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
     Facebook
   </div>
+  <div class="nav-item" data-admin-only style="display:none" onclick="showPage('linkedin', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+    LinkedIn
+  </div>
   <div class="nav-item" data-admin-only style="display:none" onclick="showPage('bonus', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
     Bonus
@@ -619,7 +623,7 @@
   <div class="topbar">
     <div class="topbar-title" id="pageTitle">Översikt</div>
     <div class="topbar-actions">
-      <input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">
+      <input class="search-box" type="text" name="crm-contact-search" placeholder="Sök kontakter..." id="globalSearch" autocomplete="off" autocorrect="off" spellcheck="false" oninput="handleSearch(this.value)">
       <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>
       <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>
     </div>
@@ -765,6 +769,29 @@
           </thead>
           <tbody id="fbBody">
             <tr><td colspan="5"><div class="empty-state">Inga inlägg loggade än</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LINKEDIN (admin only) -->
+    <div class="page" id="page-linkedin">
+      <div style="margin-bottom:16px">
+        <button class="btn btn-primary" onclick="openAddLiContact()">+ Ny LinkedIn-kontakt</button>
+      </div>
+      <div class="table-wrap">
+        <table id="liTable">
+          <thead>
+            <tr>
+              <th>Företag</th>
+              <th>Datum</th>
+              <th>Meddelande</th>
+              <th>Svar</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="liBody">
+            <tr><td colspan="5"><div class="empty-state">Inga LinkedIn-kontakter loggade än</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -993,6 +1020,43 @@
       <button class="btn btn-ghost" onclick="closeModal('fbModal')">Avbryt</button>
       <button class="btn btn-primary" onclick="saveFbPost()">Spara</button>
     </div>
+  </div>
+</div>
+
+<!-- LINKEDIN CONTACT MODAL -->
+<div class="modal-overlay" id="liModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="liModalTitle">Ny LinkedIn-kontakt</span>
+      <button class="close-btn" onclick="closeModal('liModal')">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Företag *</label>
+        <input class="form-input" id="liCompany" placeholder="t.ex. Acme AB">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Datum</label>
+        <input class="form-input" type="date" id="liDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Meddelande</label>
+      <textarea class="form-textarea" id="liText" placeholder="Vad du skickade..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Svar</label>
+      <select class="form-select" id="liReplied">
+        <option value="">— Väntar —</option>
+        <option value="yes">Ja, svarade</option>
+        <option value="no">Nej, inget svar</option>
+      </select>
+    </div>
+    <input type="hidden" id="liEditId">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('liModal')">Avbryt</button>
+      <button class="btn btn-primary" onclick="saveLiContact()">Spara</button>
+    </div>
 
   </div>
 </div>
@@ -1043,7 +1107,7 @@
 
     <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
       <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
-      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, needed_by text, registered_at text, matched_at text, type text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>create table if not exists crm_users (id uuid primary key references auth.users(id) on delete cascade, name text, role text not null default 'member' check (role in ('admin','member')));<br>create table if not exists facebook_inlagg (id text primary key, group_name text, posted_at text, post_text text, response_count int default 0, created_at bigint);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>alter table crm_users enable row level security;<br>alter table facebook_inlagg enable row level security;<br>create policy "auth select contacts" on crm_contacts for select using (auth.role() = 'authenticated');<br>create policy "auth insert contacts" on crm_contacts for insert with check (auth.role() = 'authenticated');<br>create policy "auth update contacts" on crm_contacts for update using (auth.role() = 'authenticated');<br>create policy "auth delete contacts" on crm_contacts for delete using (auth.role() = 'authenticated');<br>create policy "auth select calls" on crm_calls for select using (auth.role() = 'authenticated');<br>create policy "auth insert calls" on crm_calls for insert with check (auth.role() = 'authenticated');<br>create policy "auth update calls" on crm_calls for update using (auth.role() = 'authenticated');<br>create policy "auth delete calls" on crm_calls for delete using (auth.role() = 'authenticated');<br>create policy "read own profile" on crm_users for select using (auth.uid() = id);<br>create policy "admin all fb posts" on facebook_inlagg for all using (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin')) with check (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin'));</div>
+      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, needed_by text, registered_at text, matched_at text, type text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>create table if not exists crm_users (id uuid primary key references auth.users(id) on delete cascade, name text, role text not null default 'member' check (role in ('admin','member')));<br>create table if not exists facebook_inlagg (id text primary key, group_name text, posted_at text, post_text text, response_count int default 0, created_at bigint);<br>create table if not exists linkedin_kontakter (id text primary key, company text, contacted_at text, message text, replied text, created_at bigint);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>alter table crm_users enable row level security;<br>alter table facebook_inlagg enable row level security;<br>alter table linkedin_kontakter enable row level security;<br>create policy "auth select contacts" on crm_contacts for select using (auth.role() = 'authenticated');<br>create policy "auth insert contacts" on crm_contacts for insert with check (auth.role() = 'authenticated');<br>create policy "auth update contacts" on crm_contacts for update using (auth.role() = 'authenticated');<br>create policy "auth delete contacts" on crm_contacts for delete using (auth.role() = 'authenticated');<br>create policy "auth select calls" on crm_calls for select using (auth.role() = 'authenticated');<br>create policy "auth insert calls" on crm_calls for insert with check (auth.role() = 'authenticated');<br>create policy "auth update calls" on crm_calls for update using (auth.role() = 'authenticated');<br>create policy "auth delete calls" on crm_calls for delete using (auth.role() = 'authenticated');<br>create policy "read own profile" on crm_users for select using (auth.uid() = id);<br>create policy "admin all fb posts" on facebook_inlagg for all using (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin')) with check (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin'));<br>create policy "admin all li contacts" on linkedin_kontakter for all using (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin')) with check (exists (select 1 from crm_users u where u.id = auth.uid() and u.role = 'admin'));</div>
     </div>
 
     <div class="form-group">
@@ -1090,6 +1154,7 @@ let currentUser   = null;   // logged-in auth user
 let contacts = [];
 let calls = [];
 let fbPosts = [];   // Facebook-inlägg — admin-only, se RLS-policy
+let liContacts = []; // LinkedIn-kontakter — admin-only, se RLS-policy
 let currentContactId = null;
 let currentFilter = 'all';
 let currentFollowupFilter = 'all';
@@ -1172,6 +1237,23 @@ async function sbUpsertFbPost(row) {
   if (error) throw new Error(error.message);
 }
 
+async function sbGetLiContacts() {
+  const rows = await sbGet('linkedin_kontakter');
+  return rows.map(r => ({
+    id: r.id, company: r.company, date: r.contacted_at, text: r.message,
+    replied: r.replied, createdAt: r.created_at
+  }));
+}
+
+async function sbUpsertLiContact(row) {
+  const mapped = {
+    id: row.id, company: row.company, contacted_at: row.date, message: row.text,
+    replied: row.replied || null, created_at: row.createdAt || Date.now()
+  };
+  const { error } = await sb.from('linkedin_kontakter').upsert([mapped], { onConflict: 'id' });
+  if (error) throw new Error(error.message);
+}
+
 async function loadFromSupabase() {
   setStatus('syncing');
   try {
@@ -1180,6 +1262,7 @@ async function loadFromSupabase() {
     calls    = cl || [];
     if (USER_ROLE === 'admin') {
       try { fbPosts = await sbGetFbPosts() || []; } catch(e) { fbPosts = []; }
+      try { liContacts = await sbGetLiContacts() || []; } catch(e) { liContacts = []; }
     }
     lastSyncHash = JSON.stringify([contacts, calls]);
     setStatus('ok');
@@ -1296,7 +1379,11 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   el.classList.add('active');
-  const titles = { dashboard: 'Översikt', contacts: 'Kontakter', calls: 'Samtalslogg', followups: 'Uppföljningar', facebook: 'Facebook', bonus: 'Bonus' };
+  if (id === 'contacts') {
+    currentFilter = 'all';
+    document.querySelectorAll('#contactFilters .filter-btn').forEach((btn, i) => btn.classList.toggle('active', i === 0));
+  }
+  const titles = { dashboard: 'Översikt', contacts: 'Kontakter', calls: 'Samtalslogg', followups: 'Uppföljningar', facebook: 'Facebook', linkedin: 'LinkedIn', bonus: 'Bonus' };
   document.getElementById('pageTitle').textContent = titles[id];
   renderAll();
 }
@@ -1308,7 +1395,7 @@ function renderAll() {
   renderCalls();
   renderFollowups();
   renderSidebarStats();
-  if (USER_ROLE === 'admin') { renderFbPosts(); renderBonus(); }
+  if (USER_ROLE === 'admin') { renderFbPosts(); renderLiContacts(); renderBonus(); }
 }
 
 function statusBadge(s) {
@@ -2091,6 +2178,84 @@ function deleteFbPost(id) {
   renderFbPosts();
   setStatus('syncing');
   sbDeleteRow('facebook_inlagg', id).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
+}
+
+// ─── LINKEDIN CONTACTS (admin only) ──────────────────────
+function renderLiContacts() {
+  const tbody = document.getElementById('liBody');
+  if (!tbody) return;
+  if (liContacts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Inga LinkedIn-kontakter loggade än</div></td></tr>';
+    return;
+  }
+  const sorted = [...liContacts].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const repliedLabel = r => r === 'yes' ? '<span class="badge badge-interested">Svarade</span>' : r === 'no' ? '<span class="badge badge-notinterested">Inget svar</span>' : '<span class="badge badge-notanswered">Väntar</span>';
+  tbody.innerHTML = sorted.map(p => `
+    <tr>
+      <td style="font-weight:600">${p.company}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${fmtDate(p.date)}</td>
+      <td style="color:var(--muted2);font-size:12px;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.text || '—'}</td>
+      <td>${repliedLabel(p.replied)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openEditLiContact('${p.id}')">✎</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteLiContact('${p.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddLiContact() {
+  document.getElementById('liModalTitle').textContent = 'Ny LinkedIn-kontakt';
+  document.getElementById('liCompany').value = '';
+  document.getElementById('liDate').value = today();
+  document.getElementById('liText').value = '';
+  document.getElementById('liReplied').value = '';
+  document.getElementById('liEditId').value = '';
+  openModal('liModal');
+}
+
+function openEditLiContact(id) {
+  const p = liContacts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('liModalTitle').textContent = 'Redigera LinkedIn-kontakt';
+  document.getElementById('liCompany').value = p.company || '';
+  document.getElementById('liDate').value = p.date || '';
+  document.getElementById('liText').value = p.text || '';
+  document.getElementById('liReplied').value = p.replied || '';
+  document.getElementById('liEditId').value = id;
+  openModal('liModal');
+}
+
+function saveLiContact() {
+  const company = document.getElementById('liCompany').value.trim();
+  if (!company) { alert('Företagsnamn krävs'); return; }
+  const editId = document.getElementById('liEditId').value;
+  const data = {
+    company,
+    date: document.getElementById('liDate').value || today(),
+    text: document.getElementById('liText').value.trim(),
+    replied: document.getElementById('liReplied').value || null
+  };
+  let row;
+  if (editId) {
+    const idx = liContacts.findIndex(p => p.id === editId);
+    row = { ...liContacts[idx], ...data };
+    liContacts[idx] = row;
+  } else {
+    row = { id: genId(), createdAt: Date.now(), ...data };
+    liContacts.push(row);
+  }
+  closeModal('liModal');
+  renderLiContacts();
+  setStatus('syncing');
+  sbUpsertLiContact(row).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
+}
+
+function deleteLiContact(id) {
+  if (!confirm('Ta bort den här LinkedIn-kontakten?')) return;
+  liContacts = liContacts.filter(p => p.id !== id);
+  renderLiContacts();
+  setStatus('syncing');
+  sbDeleteRow('linkedin_kontakter', id).then(() => setStatus('ok')).catch(e => setStatus('error', e.message));
 }
 
 // ─── BONUS (admin only) ───────────────────────────────────
