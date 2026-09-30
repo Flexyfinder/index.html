@@ -1126,26 +1126,81 @@
 
 <!-- AVTAL MODAL -->
 <div class="modal-overlay" id="avtalModal" onclick="if(event.target===this)closeModal('avtalModal')">
-  <div class="modal-box" style="max-width:480px">
-    <div class="modal-title">📄 Avtal</div>
-    <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="aForetag" type="text" placeholder="Företagsnamn"></div>
-    <div class="form-group">
-      <label class="form-label">Typ av avtal</label>
-      <select class="form-input" id="aTyp">
-        <option value="inhyrare">Inhyrare — de hyr in personal</option>
-        <option value="uthyrare">Uthyrare — de hyr ut personal</option>
-      </select>
+  <div class="modal-box" style="max-width:660px;max-height:92vh;overflow-y:auto;padding:28px">
+    <div class="modal-title">📄 Match &amp; Avtal</div>
+
+    <!-- MATCHNING -->
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Matchning</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="form-group"><label class="form-label">Match-ID</label><input class="form-input" id="aMatchId" placeholder="FF-2025-0001"></div>
+      <div class="form-group"><label class="form-label">Inhyraren bekräftade</label><input class="form-input" id="aInhBekr" type="datetime-local"></div>
+      <div class="form-group"><label class="form-label">Uthyraren bekräftade</label><input class="form-input" id="aUthBekr" type="datetime-local"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-      <div class="form-group"><label class="form-label">Match datum</label><input class="form-input" id="aMatchDatum" type="date"></div>
-      <div class="form-group"><label class="form-label">Avtal skickat</label><input class="form-input" id="aSkickat" type="date"></div>
-      <div class="form-group"><label class="form-label">Signerat</label><input class="form-input" id="aSignerat" type="date"></div>
+
+    <!-- INHYRARE -->
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Inhyrare — hyr in personal</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+      <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="aInhForetag" placeholder="Byggbolaget AB"></div>
+      <div class="form-group"><label class="form-label">Org.nr</label><input class="form-input" id="aInhOrgNr" placeholder="556xxx-xxxx"></div>
     </div>
-    <div class="form-group"><label class="form-label">Anteckningar</label><textarea class="form-input" id="aNotes" rows="3" placeholder="Uppdragets omfattning, villkor..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="form-group"><label class="form-label">Kontaktperson</label><input class="form-input" id="aInhKontakt" placeholder="Anna Svensson"></div>
+      <div class="form-group"><label class="form-label">E-post</label><input class="form-input" id="aInhEpost" type="email" placeholder="anna@..."></div>
+      <div class="form-group"><label class="form-label">Telefon</label><input class="form-input" id="aInhTelefon" placeholder="07xx-xxx xxx"></div>
+    </div>
+
+    <!-- UTHYRARE -->
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--accent2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Uthyrare — hyr ut personal</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+      <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="aUthForetag" placeholder="Bemanningsbolaget AB"></div>
+      <div class="form-group"><label class="form-label">Org.nr</label><input class="form-input" id="aUthOrgNr" placeholder="556xxx-xxxx"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
+      <div class="form-group"><label class="form-label">Kontaktperson</label><input class="form-input" id="aUthKontakt"></div>
+      <div class="form-group"><label class="form-label">E-post</label><input class="form-input" id="aUthEpost" type="email"></div>
+      <div class="form-group"><label class="form-label">Telefon</label><input class="form-input" id="aUthTelefon"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="form-group"><label class="form-label">Fakturaadress</label><input class="form-input" id="aUthFaktadr" placeholder="Storgatan 1, 123 45 Stockholm"></div>
+      <div class="form-group"><label class="form-label">E-post för fakturor</label><input class="form-input" id="aUthFaktEpost" type="email" placeholder="faktura@..."></div>
+    </div>
+
+    <!-- UPPDRAG -->
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Uppdrag</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
+      <div class="form-group"><label class="form-label">Yrkesroll / kompetens</label><input class="form-input" id="aYrkesroll" placeholder="Byggare"></div>
+      <div class="form-group"><label class="form-label">Resurs (namn)</label><input class="form-input" id="aResurs" placeholder="Erik Bergkvist"></div>
+      <div class="form-group"><label class="form-label">Antal personer</label><input class="form-input" id="aAntalPers" type="number" min="1" value="1"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:8px"><label class="form-label">Arbetsplats (adress och ort)</label><input class="form-input" id="aArbetsplats" placeholder="Exempelgatan 1, Hägersten"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="form-group"><label class="form-label">Period från</label><input class="form-input" id="aPeriodStart" type="date" oninput="calcAvtalPris()"></div>
+      <div class="form-group"><label class="form-label">Period till</label><input class="form-input" id="aPeriodEnd" type="date" oninput="calcAvtalPris()"></div>
+      <div class="form-group"><label class="form-label">Arbetstid</label><input class="form-input" id="aArbetstid" placeholder="8h/dag, mån–fre"></div>
+      <div class="form-group"><label class="form-label">Timmar totalt</label><input class="form-input" id="aTimmarTot" type="number" placeholder="40" oninput="calcAvtalPris()"></div>
+    </div>
+
+    <!-- PRIS -->
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Pris</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Timpris exkl. moms (kr/h)</label><input class="form-input" id="aTimpris" type="number" placeholder="600" oninput="calcAvtalPris()"></div>
+      <div class="form-group"><label class="form-label">FlexyFinder-avgift (%)</label><input class="form-input" id="aFfProcent" type="number" value="8.5" step="0.1" oninput="calcAvtalPris()"></div>
+    </div>
+    <div id="avtalPrisCalc" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'DM Mono',monospace;font-size:12px;line-height:2.1;margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">Uppdragsvärde exkl. moms</span><span id="calcUppdrags" style="font-weight:600">–</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">FlexyFinder-avgift</span><span id="calcAvgift">–</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">Moms 25% på avgift</span><span id="calcMoms">–</span></div>
+      <div style="height:1px;background:var(--border);margin:4px 0"></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--accent);font-weight:600">Fakturera inhyraren exkl. moms</span><span id="calcFaktInh" style="font-weight:700;color:var(--accent)">–</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--orange);font-weight:600">Fakturera uthyraren (avgift inkl. moms)</span><span id="calcFaktUth" style="font-weight:700;color:var(--orange)">–</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">Kvar till uthyraren exkl. moms</span><span id="calcKvar">–</span></div>
+    </div>
+
     <input type="hidden" id="aEditId">
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
       <button class="btn btn-ghost" onclick="closeModal('avtalModal')">Avbryt</button>
       <button class="btn btn-danger btn-sm" id="aDeleteBtn" onclick="doDeleteAvtal()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-ghost" id="aGenFakBtn" onclick="generateWeeklyFakturor()" style="display:none;border-color:var(--green);color:var(--green)">📋 Generera veckovisa fakturor</button>
       <button class="btn btn-primary" onclick="saveAvtal()">Spara</button>
     </div>
   </div>
@@ -2059,29 +2114,6 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 3000);
 }
 
-function copySql() {
-  const sql = `create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);
-create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);
-alter table crm_contacts enable row level security;
-alter table crm_calls enable row level security;
-create policy "allow all" on crm_contacts for all using (true) with check (true);
-create policy "allow all" on crm_calls for all using (true) with check (true);
--- Om du redan har tabellen: lägg till kolumnen för företagskontroller
-alter table crm_contacts add column if not exists verif_data text;
--- Affärer (nya tabeller):
-create table if not exists foretagskontroll (id text primary key, foretag text, org_nr text, stage text, identitet_ok boolean default false, f_skatt_ok boolean default false, forsaking_mottagen boolean default false, skulder_kontrollerade boolean default false, datum date, kontrollerad_av text, created_at bigint);
-create table if not exists avtal (id text primary key, foretag text, typ text, match_datum date, skickat_datum date, signerat_datum date, notes text, created_at bigint);
-create table if not exists fakturor (id text primary key, avtal_id text, foretag text, vecka_nr integer, belopp numeric, period_start date, period_end date, faktura_skickad date, faktura_betald date, created_at bigint);
-alter table foretagskontroll enable row level security;
-alter table avtal enable row level security;
-alter table fakturor enable row level security;
-create policy "allow all" on foretagskontroll for all using (true) with check (true);
-create policy "allow all" on avtal for all using (true) with check (true);
-create policy "allow all" on fakturor for all using (true) with check (true);`;
-  navigator.clipboard.writeText(sql);
-  showToast('✓ SQL kopierad!');
-}
-
 function showSetup() {
   const el = document.getElementById('setupOverlay');
   if (el) el.style.display = 'flex';
@@ -2563,35 +2595,70 @@ function renderAvtalCards() {
   const el = document.getElementById('avtalCards');
   if (!el) return;
   if (!avtalList2.length) {
-    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace">Inga avtal registrerade</div>';
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace">Inga matchningar registrerade</div>';
     return;
   }
   el.innerHTML = avtalList2.map(a => {
-    const typColor = a.typ === 'inhyrare' ? 'var(--accent)' : 'var(--orange)';
-    const typLabel = a.typ === 'inhyrare' ? 'Inhyrare' : 'Uthyrare';
     const faks = fakturorList.filter(f => f.avtal_id === a.id);
     const totalt = faks.reduce((s,f) => s + (parseFloat(f.belopp)||0), 0);
     const betalda = faks.filter(f => f.faktura_betald).reduce((s,f) => s + (parseFloat(f.belopp)||0), 0);
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+    const ffPct = a.ff_avgift_procent || 8.5;
+    const timmar = parseFloat(a.timmar_totalt) || 0;
+    const timpris = parseFloat(a.timpris) || 0;
+    const uppdrags = timmar * timpris;
+    const avgift = uppdrags * (ffPct/100);
+    const moms = avgift * 0.25;
+    const inhForetag = a.inhyrare_foretag || a.foretag || '–';
+    const uthForetag = a.uthyrare_foretag || '–';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
         <div>
-          <span style="font-weight:700;font-size:15px">${a.foretag||'–'}</span>
-          <span style="margin-left:10px;background:${typColor};color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600">${typLabel}</span>
+          ${a.match_id?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:4px">MATCH ${a.match_id}</div>`:''}
+          <div style="font-size:15px;font-weight:700">${inhForetag} <span style="color:var(--muted)">→</span> ${uthForetag}</div>
+          ${a.yrkesroll||a.resurs?`<div style="font-size:12px;color:var(--muted2);margin-top:2px">${[a.yrkesroll,a.resurs].filter(Boolean).join(' · ')}</div>`:''}
         </div>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" onclick="openFakturaModal(null,'${a.id}','${a.foretag||''}')" style="font-size:10px">+ Faktura</button>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" onclick="openFakturaModal(null,'${a.id}','${inhForetag.replace(/'/g,'')}')" style="font-size:10px">+ Faktura</button>
           <button class="btn btn-ghost btn-sm" onclick="openAvtalModal('${a.id}')" style="font-size:10px">✏ Redigera</button>
         </div>
       </div>
-      <div style="display:flex;gap:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)">
-        <span>Match: <strong style="color:var(--text)">${a.match_datum||'–'}</strong></span>
-        <span>Avtal skickat: <strong style="color:var(--text)">${a.skickat_datum||'–'}</strong></span>
-        <span>Signerat: <strong style="color:${a.signerat_datum?'var(--green)':'var(--muted)'}">${a.signerat_datum||'–'}</strong></span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-family:'DM Mono',monospace;font-size:11px;margin-bottom:10px">
+        <div style="padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--orange);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Inhyrare</div>
+          <div style="font-weight:600">${inhForetag}</div>
+          ${a.inhyrare_org_nr?`<div style="color:var(--muted2)">${a.inhyrare_org_nr}</div>`:''}
+          ${a.inhyrare_kontakt?`<div style="color:var(--muted2)">${a.inhyrare_kontakt}</div>`:''}
+        </div>
+        <div style="padding:10px;background:var(--surface2);border-radius:6px">
+          <div style="color:var(--accent2);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Uthyrare</div>
+          <div style="font-weight:600">${uthForetag}</div>
+          ${a.uthyrare_org_nr?`<div style="color:var(--muted2)">${a.uthyrare_org_nr}</div>`:''}
+          ${a.uthyrare_kontakt?`<div style="color:var(--muted2)">${a.uthyrare_kontakt}</div>`:''}
+        </div>
       </div>
-      ${a.notes?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">${a.notes}</div>`:''}
-      ${faks.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;display:flex;gap:16px">
+      ${a.period_start?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-bottom:8px">
+        📅 <strong style="color:var(--text)">${a.period_start}</strong> → <strong style="color:var(--text)">${a.period_end||'–'}</strong>
+        ${a.arbetstid?' · '+a.arbetstid:''}
+        ${timmar?' · '+timmar+' timmar':''}
+        ${a.arbetsplats?' · '+a.arbetsplats:''}
+      </div>`:''}
+      ${uppdrags>0?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="padding:10px;background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
+          <div style="color:var(--muted);font-size:10px;margin-bottom:2px">Fakturera inhyraren</div>
+          <div style="font-weight:700;color:var(--accent);font-size:13px">${Math.round(uppdrags).toLocaleString('sv-SE')} kr</div>
+        </div>
+        <div style="padding:10px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
+          <div style="color:var(--muted);font-size:10px;margin-bottom:2px">Fakturera uthyraren (FF-avgift)</div>
+          <div style="font-weight:700;color:var(--orange);font-size:13px">${Math.round(avgift+moms).toLocaleString('sv-SE')} kr</div>
+        </div>
+        <div style="padding:10px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
+          <div style="color:var(--muted);font-size:10px;margin-bottom:2px">Kvar till uthyraren</div>
+          <div style="font-weight:700;color:var(--green);font-size:13px">${Math.round(uppdrags-avgift).toLocaleString('sv-SE')} kr</div>
+        </div>
+      </div>`:''}
+      ${faks.length?`<div style="padding-top:8px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);display:flex;gap:14px;flex-wrap:wrap">
         <span>📋 ${faks.length} faktura${faks.length>1?'r':''}</span>
-        <span>Totalt: <strong>${totalt.toLocaleString('sv-SE')} kr</strong></span>
+        <span>Totalt: <strong style="color:var(--text)">${totalt.toLocaleString('sv-SE')} kr</strong></span>
         <span>Betalt: <strong style="color:var(--green)">${betalda.toLocaleString('sv-SE')} kr</strong></span>
         ${totalt-betalda>0?`<span>Utestående: <strong style="color:var(--orange)">${(totalt-betalda).toLocaleString('sv-SE')} kr</strong></span>`:''}
       </div>`:''}
@@ -2637,8 +2704,9 @@ function renderFakturaList() {
         <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
           <th style="padding:6px 4px;text-align:left;font-weight:500">Vecka</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Period</th>
-          <th style="padding:6px 4px;text-align:right;font-weight:500">Belopp</th>
-          <th style="padding:6px 4px;text-align:left;font-weight:500">Faktura skickad</th>
+          <th style="padding:6px 4px;text-align:right;font-weight:500">Inhyrare</th>
+          <th style="padding:6px 4px;text-align:right;font-weight:500">FF-avgift</th>
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Skickad</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Betald</th>
           <th></th>
         </tr></thead>
@@ -2646,9 +2714,10 @@ function renderFakturaList() {
           <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="openFakturaModal('${f.id}')">
             <td style="padding:7px 4px;font-weight:600">V${f.vecka_nr||'?'}</td>
             <td style="padding:7px 4px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
-            <td style="padding:7px 4px;text-align:right;font-weight:600">${f.belopp?parseFloat(f.belopp).toLocaleString('sv-SE')+' kr':'–'}</td>
-            <td style="padding:7px 4px">${f.faktura_skickad?`<span style="color:var(--accent)">✓ ${f.faktura_skickad}</span>`:'<span style="color:var(--muted)">Ej skickad</span>'}</td>
-            <td style="padding:7px 4px">${f.faktura_betald?`<span style="color:var(--green)">✓ ${f.faktura_betald}</span>`:'<span style="color:var(--muted)">Ej betald</span>'}</td>
+            <td style="padding:7px 4px;text-align:right;font-weight:700;color:var(--accent)">${f.belopp?parseFloat(f.belopp).toLocaleString('sv-SE')+' kr':'–'}</td>
+            <td style="padding:7px 4px;text-align:right;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
+            <td style="padding:7px 4px">${f.faktura_skickad?`<span style="color:var(--accent)">✓ ${f.faktura_skickad}</span>`:'<span style="color:var(--muted)">–</span>'}</td>
+            <td style="padding:7px 4px">${f.faktura_betald?`<span style="color:var(--green)">✓ ${f.faktura_betald}</span>`:'<span style="color:var(--muted)">–</span>'}</td>
             <td style="padding:7px 4px;text-align:right"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();doDeleteFaktura('${f.id}')" style="color:var(--red);font-size:10px;padding:2px 6px">✕</button></td>
           </tr>`).join('')}
         </tbody>
@@ -2714,47 +2783,190 @@ async function doDeleteKontroll(id) {
 }
 
 // ─── AFFÄRER: AVTAL MODAL ───────────────────────────────
+function calcAvtalPris() {
+  const timmar = parseFloat(document.getElementById('aTimmarTot').value) || 0;
+  const timpris = parseFloat(document.getElementById('aTimpris').value) || 0;
+  const ffPct = parseFloat(document.getElementById('aFfProcent').value) || 8.5;
+  const calc = document.getElementById('avtalPrisCalc');
+  if (timmar > 0 && timpris > 0) {
+    const uppdrags = timmar * timpris;
+    const avgift = uppdrags * (ffPct / 100);
+    const moms = avgift * 0.25;
+    document.getElementById('calcUppdrags').textContent = Math.round(uppdrags).toLocaleString('sv-SE') + ' kr';
+    document.getElementById('calcAvgift').textContent = Math.round(avgift).toLocaleString('sv-SE') + ' kr (' + ffPct + '%)';
+    document.getElementById('calcMoms').textContent = Math.round(moms).toLocaleString('sv-SE') + ' kr';
+    document.getElementById('calcFaktInh').textContent = Math.round(uppdrags).toLocaleString('sv-SE') + ' kr';
+    document.getElementById('calcFaktUth').textContent = Math.round(avgift + moms).toLocaleString('sv-SE') + ' kr';
+    document.getElementById('calcKvar').textContent = Math.round(uppdrags - avgift).toLocaleString('sv-SE') + ' kr';
+    calc.style.display = '';
+  } else {
+    calc.style.display = 'none';
+  }
+}
+
 function openAvtalModal(id) {
   const a = id ? avtalList2.find(x=>x.id===id) : null;
-  document.getElementById('aForetag').value    = a?.foretag||'';
-  document.getElementById('aTyp').value        = a?.typ||'inhyrare';
-  document.getElementById('aMatchDatum').value = a?.match_datum||'';
-  document.getElementById('aSkickat').value    = a?.skickat_datum||'';
-  document.getElementById('aSignerat').value   = a?.signerat_datum||'';
-  document.getElementById('aNotes').value      = a?.notes||'';
-  document.getElementById('aEditId').value     = a?.id||'';
+  // Matchning
+  document.getElementById('aMatchId').value      = a?.match_id||'';
+  document.getElementById('aInhBekr').value      = a?.inh_bekraftade||'';
+  document.getElementById('aUthBekr').value      = a?.uth_bekraftade||'';
+  // Inhyrare
+  document.getElementById('aInhForetag').value   = a?.inhyrare_foretag||'';
+  document.getElementById('aInhOrgNr').value     = a?.inhyrare_org_nr||'';
+  document.getElementById('aInhKontakt').value   = a?.inhyrare_kontakt||'';
+  document.getElementById('aInhEpost').value     = a?.inhyrare_epost||'';
+  document.getElementById('aInhTelefon').value   = a?.inhyrare_telefon||'';
+  // Uthyrare
+  document.getElementById('aUthForetag').value   = a?.uthyrare_foretag||'';
+  document.getElementById('aUthOrgNr').value     = a?.uthyrare_org_nr||'';
+  document.getElementById('aUthKontakt').value   = a?.uthyrare_kontakt||'';
+  document.getElementById('aUthEpost').value     = a?.uthyrare_epost||'';
+  document.getElementById('aUthTelefon').value   = a?.uthyrare_telefon||'';
+  document.getElementById('aUthFaktadr').value   = a?.uthyrare_fakturaadress||'';
+  document.getElementById('aUthFaktEpost').value = a?.uthyrare_faktura_epost||'';
+  // Uppdrag
+  document.getElementById('aYrkesroll').value    = a?.yrkesroll||'';
+  document.getElementById('aResurs').value       = a?.resurs||'';
+  document.getElementById('aAntalPers').value    = a?.antal_personer||1;
+  document.getElementById('aArbetsplats').value  = a?.arbetsplats||'';
+  document.getElementById('aPeriodStart').value  = a?.period_start||'';
+  document.getElementById('aPeriodEnd').value    = a?.period_end||'';
+  document.getElementById('aArbetstid').value    = a?.arbetstid||'8h/dag, mån–fre';
+  document.getElementById('aTimmarTot').value    = a?.timmar_totalt||'';
+  // Pris
+  document.getElementById('aTimpris').value      = a?.timpris||'';
+  document.getElementById('aFfProcent').value    = a?.ff_avgift_procent||8.5;
+  document.getElementById('aEditId').value       = a?.id||'';
   document.getElementById('aDeleteBtn').style.display = a ? '' : 'none';
+  document.getElementById('aGenFakBtn').style.display = a ? '' : 'none';
+  calcAvtalPris();
   document.getElementById('avtalModal').style.display='flex';
 }
+
 async function saveAvtal() {
   const id = document.getElementById('aEditId').value || genId();
+  const inhForetag = document.getElementById('aInhForetag').value.trim();
+  const uthForetag = document.getElementById('aUthForetag').value.trim();
+  if (!inhForetag && !uthForetag) { showToast('Ange minst inhyrare eller uthyrare'); return; }
   const row = {
-    id, foretag: document.getElementById('aForetag').value.trim(),
-    typ: document.getElementById('aTyp').value,
-    match_datum: document.getElementById('aMatchDatum').value||null,
-    skickat_datum: document.getElementById('aSkickat').value||null,
-    signerat_datum: document.getElementById('aSignerat').value||null,
-    notes: document.getElementById('aNotes').value.trim(),
+    id,
+    foretag: inhForetag || uthForetag,
+    typ: 'match',
+    match_id: document.getElementById('aMatchId').value.trim()||null,
+    inh_bekraftade: document.getElementById('aInhBekr').value||null,
+    uth_bekraftade: document.getElementById('aUthBekr').value||null,
+    inhyrare_foretag: inhForetag,
+    inhyrare_org_nr: document.getElementById('aInhOrgNr').value.trim(),
+    inhyrare_kontakt: document.getElementById('aInhKontakt').value.trim(),
+    inhyrare_epost: document.getElementById('aInhEpost').value.trim(),
+    inhyrare_telefon: document.getElementById('aInhTelefon').value.trim(),
+    uthyrare_foretag: uthForetag,
+    uthyrare_org_nr: document.getElementById('aUthOrgNr').value.trim(),
+    uthyrare_kontakt: document.getElementById('aUthKontakt').value.trim(),
+    uthyrare_epost: document.getElementById('aUthEpost').value.trim(),
+    uthyrare_telefon: document.getElementById('aUthTelefon').value.trim(),
+    uthyrare_fakturaadress: document.getElementById('aUthFaktadr').value.trim(),
+    uthyrare_faktura_epost: document.getElementById('aUthFaktEpost').value.trim(),
+    yrkesroll: document.getElementById('aYrkesroll').value.trim(),
+    resurs: document.getElementById('aResurs').value.trim(),
+    antal_personer: parseInt(document.getElementById('aAntalPers').value)||1,
+    arbetsplats: document.getElementById('aArbetsplats').value.trim(),
+    period_start: document.getElementById('aPeriodStart').value||null,
+    period_end: document.getElementById('aPeriodEnd').value||null,
+    arbetstid: document.getElementById('aArbetstid').value.trim(),
+    timmar_totalt: parseFloat(document.getElementById('aTimmarTot').value)||null,
+    timpris: parseFloat(document.getElementById('aTimpris').value)||null,
+    ff_avgift_procent: parseFloat(document.getElementById('aFfProcent').value)||8.5,
     created_at: Date.now()
   };
-  if (!row.foretag) { showToast('Ange företagsnamn'); return; }
   try {
     await sbSaveAvtal2(row);
     const idx = avtalList2.findIndex(x=>x.id===id);
     if (idx>=0) avtalList2[idx]=row; else avtalList2.unshift(row);
-    closeModal('avtalModal');
+    // show gen + delete buttons after first save
+    document.getElementById('aEditId').value = id;
+    document.getElementById('aGenFakBtn').style.display = '';
+    document.getElementById('aDeleteBtn').style.display = '';
     renderAvtalCards();
-    showToast('✓ Avtal sparat');
+    showToast('✓ Match sparad');
   } catch(e) { showToast('Fel: '+e.message); }
 }
+
 async function doDeleteAvtal() {
   const id = document.getElementById('aEditId').value;
-  if (!id || !confirm('Radera avtal?')) return;
+  if (!id || !confirm('Radera match och alla kopplade fakturor?')) return;
   await sbDeleteAvtalDb(id);
   avtalList2 = avtalList2.filter(x=>x.id!==id);
   closeModal('avtalModal');
   renderAvtalCards();
-  showToast('Avtal raderat');
+  showToast('Match raderad');
+}
+
+function getISOWeek(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 4 - (d.getDay()||7));
+  const yr = new Date(d.getFullYear(), 0, 1);
+  return Math.ceil((((d - yr) / 86400000) + 1) / 7);
+}
+
+async function generateWeeklyFakturor() {
+  const id = document.getElementById('aEditId').value;
+  const a = avtalList2.find(x=>x.id===id);
+  if (!a || !a.period_start || !a.period_end || !a.timpris) {
+    showToast('Ange period och timpris för att generera fakturor');
+    return;
+  }
+  const start = new Date(a.period_start);
+  const end = new Date(a.period_end);
+  const ffPct = parseFloat(a.ff_avgift_procent) || 8.5;
+  // Build per-week working-day counts
+  const weeks = {};
+  const d = new Date(start);
+  while (d <= end) {
+    const dow = d.getDay();
+    if (dow >= 1 && dow <= 5) {
+      const wn = getISOWeek(d);
+      const yr = d.getFullYear();
+      const key = yr + '-' + String(wn).padStart(2,'0');
+      if (!weeks[key]) {
+        const mon = new Date(d);
+        mon.setDate(d.getDate() - (d.getDay()-1));
+        const fri = new Date(mon); fri.setDate(mon.getDate()+4);
+        const ps = mon < start ? new Date(start) : mon;
+        const pe = fri > end ? new Date(end) : fri;
+        weeks[key] = { vecka_nr: wn, days: 0, ps: ps.toISOString().split('T')[0], pe: pe.toISOString().split('T')[0] };
+      }
+      weeks[key].days++;
+    }
+    d.setDate(d.getDate()+1);
+  }
+  const totalDays = Object.values(weeks).reduce((s,w)=>s+w.days, 0);
+  const hoursPerDay = totalDays > 0 ? (parseFloat(a.timmar_totalt)||0) / totalDays : 0;
+  const generated = [];
+  for (const w of Object.values(weeks)) {
+    const hours = hoursPerDay * w.days;
+    const belopp = Math.round(hours * parseFloat(a.timpris));
+    const avgift = Math.round(belopp * (ffPct/100));
+    const moms = Math.round(avgift * 0.25);
+    const row = {
+      id: genId(),
+      avtal_id: a.id,
+      foretag: a.inhyrare_foretag || a.foretag,
+      vecka_nr: w.vecka_nr,
+      period_start: w.ps,
+      period_end: w.pe,
+      belopp,
+      belopp_uthyrare: avgift + moms,
+      created_at: Date.now()
+    };
+    try { await sbSaveFaktura(row); fakturorList.unshift(row); generated.push(row); } catch {}
+  }
+  closeModal('avtalModal');
+  renderFakturaList();
+  renderAvtalCards();
+  showAffSub('faktura', document.getElementById('affBtn-faktura'));
+  showToast('✓ ' + generated.length + ' faktura' + (generated.length!==1?'r':'') + ' genererade');
 }
 
 // ─── AFFÄRER: FAKTURA MODAL ──────────────────────────────
@@ -2835,7 +3047,7 @@ document.addEventListener('DOMContentLoaded', init);
 
     <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
       <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
-      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);<br><span style="color:var(--muted)">-- Befintliga tabeller (du har redan dessa):</span><br>alter table facebook_inlagg add column if not exists post_type text;<br>alter table facebook_inlagg add column if not exists created_at bigint;<br>alter table linkedin_kontakter add column if not exists contact_id text;<br>alter table linkedin_kontakter add column if not exists created_at bigint;<br>alter table facebook_inlagg enable row level security;<br>alter table linkedin_kontakter enable row level security;<br>create policy "allow all" on facebook_inlagg for all using (true) with check (true);<br>create policy "allow all" on linkedin_kontakter for all using (true) with check (true);<br>alter table crm_contacts add column if not exists verif_data text;<br>-- Affärer (nya tabeller):<br>create table if not exists foretagskontroll (id text primary key, foretag text, org_nr text, stage text, identitet_ok boolean default false, f_skatt_ok boolean default false, forsaking_mottagen boolean default false, skulder_kontrollerade boolean default false, datum date, kontrollerad_av text, created_at bigint);<br>create table if not exists avtal (id text primary key, foretag text, typ text, match_datum date, skickat_datum date, signerat_datum date, notes text, created_at bigint);<br>create table if not exists fakturor (id text primary key, avtal_id text, foretag text, vecka_nr integer, belopp numeric, period_start date, period_end date, faktura_skickad date, faktura_betald date, created_at bigint);<br>alter table foretagskontroll enable row level security;<br>alter table avtal enable row level security;<br>alter table fakturor enable row level security;<br>create policy "allow all" on foretagskontroll for all using (true) with check (true);<br>create policy "allow all" on avtal for all using (true) with check (true);<br>create policy "allow all" on fakturor for all using (true) with check (true);</div>
+      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);<br><span style="color:var(--muted)">-- Befintliga tabeller (du har redan dessa):</span><br>alter table facebook_inlagg add column if not exists post_type text;<br>alter table facebook_inlagg add column if not exists created_at bigint;<br>alter table linkedin_kontakter add column if not exists contact_id text;<br>alter table linkedin_kontakter add column if not exists created_at bigint;<br>alter table facebook_inlagg enable row level security;<br>alter table linkedin_kontakter enable row level security;<br>create policy "allow all" on facebook_inlagg for all using (true) with check (true);<br>create policy "allow all" on linkedin_kontakter for all using (true) with check (true);<br>alter table crm_contacts add column if not exists verif_data text;<br>-- Affärer (nya tabeller):<br>create table if not exists foretagskontroll (id text primary key, foretag text, org_nr text, stage text, identitet_ok boolean default false, f_skatt_ok boolean default false, forsaking_mottagen boolean default false, skulder_kontrollerade boolean default false, datum date, kontrollerad_av text, created_at bigint);<br>create table if not exists avtal (id text primary key, foretag text, typ text, match_datum date, skickat_datum date, signerat_datum date, notes text, created_at bigint);<br>create table if not exists fakturor (id text primary key, avtal_id text, foretag text, vecka_nr integer, belopp numeric, period_start date, period_end date, faktura_skickad date, faktura_betald date, created_at bigint);<br>alter table foretagskontroll enable row level security;<br>alter table avtal enable row level security;<br>alter table fakturor enable row level security;<br>create policy "allow all" on foretagskontroll for all using (true) with check (true);<br>create policy "allow all" on avtal for all using (true) with check (true);<br>create policy "allow all" on fakturor for all using (true) with check (true);<br><span style="color:var(--muted)">-- Match-detaljer (utökade avtal-kolumner):</span><br>alter table avtal add column if not exists match_id text;<br>alter table avtal add column if not exists inh_bekraftade text;<br>alter table avtal add column if not exists uth_bekraftade text;<br>alter table avtal add column if not exists inhyrare_foretag text;<br>alter table avtal add column if not exists inhyrare_org_nr text;<br>alter table avtal add column if not exists inhyrare_kontakt text;<br>alter table avtal add column if not exists inhyrare_epost text;<br>alter table avtal add column if not exists inhyrare_telefon text;<br>alter table avtal add column if not exists uthyrare_foretag text;<br>alter table avtal add column if not exists uthyrare_org_nr text;<br>alter table avtal add column if not exists uthyrare_kontakt text;<br>alter table avtal add column if not exists uthyrare_epost text;<br>alter table avtal add column if not exists uthyrare_telefon text;<br>alter table avtal add column if not exists uthyrare_fakturaadress text;<br>alter table avtal add column if not exists uthyrare_faktura_epost text;<br>alter table avtal add column if not exists yrkesroll text;<br>alter table avtal add column if not exists resurs text;<br>alter table avtal add column if not exists antal_personer integer;<br>alter table avtal add column if not exists arbetsplats text;<br>alter table avtal add column if not exists period_start date;<br>alter table avtal add column if not exists period_end date;<br>alter table avtal add column if not exists arbetstid text;<br>alter table avtal add column if not exists timmar_totalt numeric;<br>alter table avtal add column if not exists timpris numeric;<br>alter table avtal add column if not exists ff_avgift_procent numeric default 8.5;<br>alter table fakturor add column if not exists belopp_uthyrare numeric;</div>
     </div>
 
     <div class="form-group">
@@ -2872,7 +3084,44 @@ alter table facebook_inlagg enable row level security;
 alter table linkedin_kontakter enable row level security;
 create policy "allow all" on facebook_inlagg for all using (true) with check (true);
 create policy "allow all" on linkedin_kontakter for all using (true) with check (true);
-alter table crm_contacts add column if not exists verif_data text;`;
+alter table crm_contacts add column if not exists verif_data text;
+-- Affärer (nya tabeller):
+create table if not exists foretagskontroll (id text primary key, foretag text, org_nr text, stage text, identitet_ok boolean default false, f_skatt_ok boolean default false, forsaking_mottagen boolean default false, skulder_kontrollerade boolean default false, datum date, kontrollerad_av text, created_at bigint);
+create table if not exists avtal (id text primary key, foretag text, typ text, match_datum date, skickat_datum date, signerat_datum date, notes text, created_at bigint);
+create table if not exists fakturor (id text primary key, avtal_id text, foretag text, vecka_nr integer, belopp numeric, period_start date, period_end date, faktura_skickad date, faktura_betald date, created_at bigint);
+alter table foretagskontroll enable row level security;
+alter table avtal enable row level security;
+alter table fakturor enable row level security;
+create policy "allow all" on foretagskontroll for all using (true) with check (true);
+create policy "allow all" on avtal for all using (true) with check (true);
+create policy "allow all" on fakturor for all using (true) with check (true);
+-- Match-detaljer (utökade avtal-kolumner):
+alter table avtal add column if not exists match_id text;
+alter table avtal add column if not exists inh_bekraftade text;
+alter table avtal add column if not exists uth_bekraftade text;
+alter table avtal add column if not exists inhyrare_foretag text;
+alter table avtal add column if not exists inhyrare_org_nr text;
+alter table avtal add column if not exists inhyrare_kontakt text;
+alter table avtal add column if not exists inhyrare_epost text;
+alter table avtal add column if not exists inhyrare_telefon text;
+alter table avtal add column if not exists uthyrare_foretag text;
+alter table avtal add column if not exists uthyrare_org_nr text;
+alter table avtal add column if not exists uthyrare_kontakt text;
+alter table avtal add column if not exists uthyrare_epost text;
+alter table avtal add column if not exists uthyrare_telefon text;
+alter table avtal add column if not exists uthyrare_fakturaadress text;
+alter table avtal add column if not exists uthyrare_faktura_epost text;
+alter table avtal add column if not exists yrkesroll text;
+alter table avtal add column if not exists resurs text;
+alter table avtal add column if not exists antal_personer integer;
+alter table avtal add column if not exists arbetsplats text;
+alter table avtal add column if not exists period_start date;
+alter table avtal add column if not exists period_end date;
+alter table avtal add column if not exists arbetstid text;
+alter table avtal add column if not exists timmar_totalt numeric;
+alter table avtal add column if not exists timpris numeric;
+alter table avtal add column if not exists ff_avgift_procent numeric default 8.5;
+alter table fakturor add column if not exists belopp_uthyrare numeric;`;
   navigator.clipboard.writeText(sql).then(() => showToast('✓ SQL kopierad!'));
 }
 </script>
