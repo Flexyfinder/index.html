@@ -604,6 +604,16 @@
   }
   .vdot-ok { background: var(--green); }
   .vdot-no { background: var(--border); border: 1px solid var(--muted); }
+
+  /* SOCIAL MEDIA */
+  .li-badge { display:inline-flex;align-items:center;gap:3px;background:#0a66c2;color:#fff;border-radius:3px;padding:1px 5px;font-size:9px;font-family:'DM Mono',monospace;vertical-align:middle;font-weight:600; }
+  .fb-type-in { background:rgba(37,99,235,0.12);color:var(--accent);border-radius:4px;padding:2px 8px;font-size:11px;font-family:'DM Mono',monospace;font-weight:600; }
+  .fb-type-ut { background:rgba(34,197,94,0.12);color:#16a34a;border-radius:4px;padding:2px 8px;font-size:11px;font-family:'DM Mono',monospace;font-weight:600; }
+  .fb-post-row { background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px; }
+  .fb-post-meta { font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px; }
+  .fb-post-text { font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text); }
+  .fb-filter-btn { background:none;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--muted2); }
+  .fb-filter-btn.active { background:var(--accent);color:#fff; }
 </style>
 </head>
 <body>
@@ -631,6 +641,10 @@
   <div class="nav-item" onclick="showPage('followups', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     Follow-ups
+  </div>
+  <div class="nav-item" onclick="showPage('social', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    Social Media
   </div>
 
   <div class="sidebar-bottom">
@@ -1007,6 +1021,87 @@
   </div>
 </div>
 
+<!-- SOCIAL PAGE -->
+<div class="page" id="page-social">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <div style="font-size:18px;font-weight:700">Social Media</div>
+      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">Dina inlägg i Facebook-grupper</div>
+    </div>
+    <button class="btn btn-primary" onclick="openFbModal()">+ Nytt inlägg</button>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content">
+    <button class="fb-filter-btn active" onclick="filterFb('alla')" id="fbf-alla">Alla</button>
+    <button class="fb-filter-btn" onclick="filterFb('inhyrare')" id="fbf-inhyrare">Inhyrare</button>
+    <button class="fb-filter-btn" onclick="filterFb('uthyrare')" id="fbf-uthyrare">Uthyrare</button>
+  </div>
+  <div id="fbPostList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga inlägg registrerade ännu</div></div>
+</div>
+
+<!-- FACEBOOK MODAL -->
+<div class="modal-overlay" id="fbModal" onclick="if(event.target===this)closeModal('fbModal')">
+  <div class="modal-box" style="max-width:540px">
+    <div class="modal-title">📘 Facebook-inlägg</div>
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input class="form-input" id="fbDate" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Facebook-grupp</label>
+      <input class="form-input" id="fbGroup" placeholder="t.ex. Bygg & El Stockholm">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Typ</label>
+      <select class="form-input" id="fbType">
+        <option value="inhyrare">Inhyrare (söker personal)</option>
+        <option value="uthyrare">Uthyrare (erbjuder personal)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Inläggstexten</label>
+      <textarea class="form-input" id="fbText" rows="5" placeholder="Klistra in din inläggstext här..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Antal svar (valfritt)</label>
+      <input class="form-input" id="fbResponses" type="number" min="0" placeholder="0">
+    </div>
+    <input type="hidden" id="fbEditId">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('fbModal')">Avbryt</button>
+      <button class="btn btn-danger btn-sm" id="fbDeleteBtn" onclick="deleteFbPost()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-primary" onclick="saveFbPost()">Spara</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINKEDIN MODAL -->
+<div class="modal-overlay" id="liModal" onclick="if(event.target===this)closeModal('liModal')">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-title">🔵 LinkedIn-utskick</div>
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input class="form-input" id="liDate" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Meddelande</label>
+      <textarea class="form-input" id="liMessage" rows="4" placeholder="Vad skickade du?"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Svar mottaget?</label>
+      <select class="form-input" id="liReplied">
+        <option value="nej">Nej</option>
+        <option value="ja">Ja</option>
+      </select>
+    </div>
+    <input type="hidden" id="liEditId">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('liModal')">Avbryt</button>
+      <button class="btn btn-danger btn-sm" id="liDeleteBtn" onclick="deleteLiKontakt()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-primary" onclick="saveLiKontakt()">Spara</button>
+    </div>
+  </div>
+</div>
+
 <!-- DETAIL PANEL -->
 <div class="detail-panel" id="detailPanel">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
@@ -1031,6 +1126,13 @@
   </div>
   <div class="detail-section">
     <div class="detail-section-title" style="display:flex;justify-content:space-between;align-items:center">
+      LinkedIn
+      <button class="btn btn-ghost btn-sm" onclick="openLiModal()" style="font-size:10px;padding:3px 8px;margin-top:-2px">+ Nytt utskick</button>
+    </div>
+    <div id="dpLinkedin" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);padding:4px 0">Inga LinkedIn-utskick registrerade</div>
+  </div>
+  <div class="detail-section">
+    <div class="detail-section-title" style="display:flex;justify-content:space-between;align-items:center">
       Företagskontroller
       <button class="btn btn-ghost btn-sm" onclick="openVerifModal()" style="font-size:10px;padding:3px 8px;margin-top:-2px">✏ Uppdatera</button>
     </div>
@@ -1051,6 +1153,9 @@ let USER_NAME     = localStorage.getItem('crm_user_name')     || '';
 
 let contacts = [];
 let calls = [];
+let fbPosts = [];
+let liKontakter = [];
+let fbFilter = 'alla';
 let currentContactId = null;
 let currentFilter = 'all';
 let currentFollowupFilter = 'all';
@@ -1116,12 +1221,52 @@ async function sbGetCalls() {
   }));
 }
 
+async function sbGetFbPosts() {
+  try {
+    const { data, error } = await getSB().from('facebook_inlagg').select('*').order('posted_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data || []).map(r => ({ id: r.id, date: r.posted_at, group: r.group_name, type: r.post_type || null, text: r.post_text, responses: r.response_count || '', createdAt: r.created_at || null }));
+  } catch { return []; }
+}
+
+async function sbSaveFbPost(post) {
+  const row = { id: post.id, posted_at: post.date, group_name: post.group, post_type: post.type, post_text: post.text, response_count: post.responses || null };
+  const { error } = await getSB().from('facebook_inlagg').upsert([row]);
+  if (error) throw new Error(error.message);
+}
+
+async function sbDeleteFbPostDb(id) {
+  const { error } = await getSB().from('facebook_inlagg').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+async function sbGetLinkedinKontakter() {
+  try {
+    const { data, error } = await getSB().from('linkedin_kontakter').select('*').order('contacted_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data || []).map(r => ({ id: r.id, contactId: r.contact_id || null, company: r.company, date: r.contacted_at, message: r.message, replied: r.replied, createdAt: r.created_at || null }));
+  } catch { return []; }
+}
+
+async function sbSaveLinkedinKontakt(li) {
+  const row = { id: li.id, company: li.company, contacted_at: li.date, message: li.message, replied: li.replied };
+  const { error } = await getSB().from('linkedin_kontakter').upsert([row]);
+  if (error) throw new Error(error.message);
+}
+
+async function sbDeleteLinkedinKontaktDb(id) {
+  const { error } = await getSB().from('linkedin_kontakter').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 async function loadFromSupabase() {
   setStatus('syncing');
   try {
-    const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
-    contacts = c || [];
-    calls    = cl || [];
+    const [c, cl, fb, li] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter()]);
+    contacts     = c || [];
+    calls        = cl || [];
+    fbPosts      = fb || [];
+    liKontakter  = li || [];
     lastSyncHash = JSON.stringify([contacts, calls]);
     setStatus('ok');
     renderAll();
@@ -1148,7 +1293,9 @@ function startPolling() {
   syncTimer = setInterval(async () => {
     if (!SUPABASE_URL) return;
     try {
-      const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
+      const [c, cl, fb, li] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter()]);
+      fbPosts     = fb || [];
+      liKontakter = li || [];
       const hash = JSON.stringify([c, cl]);
       if (hash !== lastSyncHash) {
         contacts = c || [];
@@ -1190,7 +1337,7 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   el.classList.add('active');
-  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups' };
+  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', social: 'Social Media' };
   document.getElementById('pageTitle').textContent = titles[id];
   renderAll();
 }
@@ -1201,6 +1348,7 @@ function renderAll() {
   renderContacts();
   renderCalls();
   renderFollowups();
+  renderFbPosts();
   renderSidebarStats();
 }
 
@@ -1320,7 +1468,7 @@ function renderContacts() {
       <td class="name-cell">
         <span class="company-initial" style="background:${colorFor(c.company)}20;color:${colorFor(c.company)}">${c.company[0]}</span>
         <div>
-          <div style="font-weight:600;display:flex;align-items:center;gap:6px">${c.company}${verifBadge(c)}</div>
+          <div style="font-weight:600;display:flex;align-items:center;gap:6px">${c.company}${verifBadge(c)}${liKontakter.some(l => l.company === c.company) ? '<span class="li-badge">in</span>' : ''}</div>
           <div style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace">${c.name || ''}</div>
         </div>
       </td>
@@ -1438,6 +1586,9 @@ function openDetail(id) {
     <div class="detail-row"><span class="key">Follow-up</span><span class="val">${fmtDate(c.followupDate) || '—'}</span></div>
     ${c.notes ? `<div style="margin-top:10px;font-size:12px;color:var(--muted2);line-height:1.6;font-family:'DM Mono',monospace">${c.notes}</div>` : ''}
   `;
+
+  // LinkedIn
+  renderLinkedin(c);
 
   // Verification
   renderVerif(c);
@@ -1795,12 +1946,14 @@ async function connectSupabase() {
     SUPABASE_KEY = key;
     USER_NAME    = name;
     _sb = null; // reset client with new credentials
-    const [c, cl] = await Promise.all([sbGetContacts(), sbGetCalls()]);
+    const [c, cl, fb, li] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter()]);
     localStorage.setItem('crm_supabase_url', url);
     localStorage.setItem('crm_supabase_key', key);
     localStorage.setItem('crm_user_name',    name);
-    contacts = c  || [];
-    calls    = cl || [];
+    contacts    = c  || [];
+    calls       = cl || [];
+    fbPosts     = fb || [];
+    liKontakter = li || [];
     lastSyncHash = JSON.stringify([contacts, calls]);
     hideSetup();
     renderAll();
@@ -1976,6 +2129,175 @@ function saveVerif() {
   showToast('✓ Kontroller sparade!');
 }
 
+// ─── LINKEDIN ───────────────────────────────────────────
+function renderLinkedin(c) {
+  const el = document.getElementById('dpLinkedin');
+  if (!el) return;
+  const entries = liKontakter.filter(l => l.company === c.company).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  if (entries.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:4px 0">Inga LinkedIn-utskick registrerade</div>';
+    return;
+  }
+  el.innerHTML = entries.map(li => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:var(--surface2)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)">${li.date || '—'}</span>
+        <span style="font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600;${li.replied==='ja' ? 'background:rgba(34,197,94,0.15);color:#16a34a' : 'background:var(--surface);color:var(--muted2);border:1px solid var(--border)'}">${li.replied==='ja' ? '✓ Svarade' : 'Inget svar'}</span>
+        <button class="btn btn-ghost btn-sm" onclick="openLiModal('${li.id}')" style="margin-left:auto;font-size:10px;padding:2px 6px">✏</button>
+      </div>
+      <div style="font-size:12px;color:var(--text);white-space:pre-wrap;line-height:1.5">${li.message || ''}</div>
+    </div>
+  `).join('');
+}
+
+function openLiModal(id) {
+  const li = id ? liKontakter.find(l => l.id === id) : null;
+  document.getElementById('liDate').value = li ? (li.date || '') : today();
+  document.getElementById('liMessage').value = li ? (li.message || '') : '';
+  document.getElementById('liReplied').value = li ? (li.replied || 'nej') : 'nej';
+  document.getElementById('liEditId').value = li ? li.id : '';
+  const delBtn = document.getElementById('liDeleteBtn');
+  if (delBtn) delBtn.style.display = li ? 'inline-block' : 'none';
+  openModal('liModal');
+}
+
+async function saveLiKontakt() {
+  if (!currentContactId) return;
+  const editId = document.getElementById('liEditId').value;
+  const c = contacts.find(x => x.id === currentContactId);
+  const li = {
+    id: editId || genId(),
+    contactId: currentContactId,        // kept in memory only
+    company: c ? c.company : '',        // used as DB key (column exists)
+    date: document.getElementById('liDate').value,
+    message: document.getElementById('liMessage').value.trim(),
+    replied: document.getElementById('liReplied').value,
+    createdAt: Date.now()
+  };
+  if (!li.message) { showToast('⚠ Ange ett meddelande'); return; }
+  try {
+    await sbSaveLinkedinKontakt(li);
+    if (editId) {
+      const idx = liKontakter.findIndex(l => l.id === editId);
+      if (idx !== -1) liKontakter[idx] = li; else liKontakter.push(li);
+    } else {
+      liKontakter.push(li);
+    }
+    closeModal('liModal');
+    renderLinkedin(contacts.find(x => x.id === currentContactId));
+    renderContacts();
+    showToast('✓ LinkedIn-utskick sparat!');
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+  }
+}
+
+async function deleteLiKontakt() {
+  const editId = document.getElementById('liEditId').value;
+  if (!editId) return;
+  if (!confirm('Radera detta utskick?')) return;
+  try {
+    await sbDeleteLinkedinKontaktDb(editId);
+    liKontakter = liKontakter.filter(l => l.id !== editId);
+    closeModal('liModal');
+    const c = contacts.find(x => x.id === currentContactId);
+    if (c) renderLinkedin(c);
+    renderContacts();
+    showToast('🗑 Utskick raderat');
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+  }
+}
+
+// ─── FACEBOOK POSTS ─────────────────────────────────────
+function filterFb(type) {
+  fbFilter = type;
+  ['alla','inhyrare','uthyrare'].forEach(t => {
+    const btn = document.getElementById('fbf-' + t);
+    if (btn) btn.classList.toggle('active', t === type);
+  });
+  renderFbPosts();
+}
+
+function renderFbPosts() {
+  const el = document.getElementById('fbPostList');
+  if (!el) return;
+  const list = fbFilter === 'alla' ? fbPosts : fbPosts.filter(p => p.type === fbFilter);
+  const sorted = [...list].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  if (sorted.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga inlägg registrerade ännu</div>';
+    return;
+  }
+  el.innerHTML = sorted.map(p => `
+    <div class="fb-post-row">
+      <div class="fb-post-meta">
+        <span>${p.date || '—'}</span>
+        <span class="${p.type === 'inhyrare' ? 'fb-type-in' : 'fb-type-ut'}">${p.type === 'inhyrare' ? 'Inhyrare' : 'Uthyrare'}</span>
+        <span>${p.group || '—'}</span>
+        ${p.responses ? `<span style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace">💬 ${p.responses} svar</span>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="openFbModal('${p.id}')" style="margin-left:auto;font-size:10px;padding:2px 8px">✏ Redigera</button>
+      </div>
+      <div class="fb-post-text">${p.text || ''}</div>
+    </div>
+  `).join('');
+}
+
+function openFbModal(id) {
+  const post = id ? fbPosts.find(p => p.id === id) : null;
+  document.getElementById('fbDate').value = post ? (post.date || '') : today();
+  document.getElementById('fbGroup').value = post ? (post.group || '') : '';
+  document.getElementById('fbType').value = post ? (post.type || 'inhyrare') : 'inhyrare';
+  document.getElementById('fbText').value = post ? (post.text || '') : '';
+  document.getElementById('fbResponses').value = post ? (post.responses || '') : '';
+  document.getElementById('fbEditId').value = post ? post.id : '';
+  const delBtn = document.getElementById('fbDeleteBtn');
+  if (delBtn) delBtn.style.display = post ? 'inline-block' : 'none';
+  openModal('fbModal');
+}
+
+async function saveFbPost() {
+  const editId = document.getElementById('fbEditId').value;
+  const post = {
+    id: editId || genId(),
+    date: document.getElementById('fbDate').value,
+    group: document.getElementById('fbGroup').value.trim(),
+    type: document.getElementById('fbType').value,
+    text: document.getElementById('fbText').value.trim(),
+    responses: document.getElementById('fbResponses').value || null,
+    createdAt: Date.now()
+  };
+  if (!post.text) { showToast('⚠ Ange inläggstext'); return; }
+  try {
+    await sbSaveFbPost(post);
+    if (editId) {
+      const idx = fbPosts.findIndex(p => p.id === editId);
+      if (idx !== -1) fbPosts[idx] = post; else fbPosts.push(post);
+    } else {
+      fbPosts.push(post);
+    }
+    closeModal('fbModal');
+    renderFbPosts();
+    showToast('✓ Inlägg sparat!');
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+  }
+}
+
+async function deleteFbPost() {
+  const editId = document.getElementById('fbEditId').value;
+  if (!editId) return;
+  if (!confirm('Radera detta inlägg?')) return;
+  try {
+    await sbDeleteFbPostDb(editId);
+    fbPosts = fbPosts.filter(p => p.id !== editId);
+    closeModal('fbModal');
+    renderFbPosts();
+    showToast('🗑 Inlägg raderat');
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+  }
+}
+
 // ─── INIT ───────────────────────────────────────────────
 function init() {
   if (!SUPABASE_URL || !SUPABASE_KEY || !USER_NAME) {
@@ -2005,7 +2327,7 @@ document.addEventListener('DOMContentLoaded', init);
 
     <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
       <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
-      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);<br><span style="color:var(--muted)">-- Befintliga användare: kör raden nedan</span><br>alter table crm_contacts add column if not exists verif_data text;</div>
+      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);<br><span style="color:var(--muted)">-- Befintliga tabeller (du har redan dessa):</span><br>alter table facebook_inlagg add column if not exists post_type text;<br>alter table facebook_inlagg add column if not exists created_at bigint;<br>alter table linkedin_kontakter add column if not exists contact_id text;<br>alter table linkedin_kontakter add column if not exists created_at bigint;<br>alter table facebook_inlagg enable row level security;<br>alter table linkedin_kontakter enable row level security;<br>create policy "allow all" on facebook_inlagg for all using (true) with check (true);<br>create policy "allow all" on linkedin_kontakter for all using (true) with check (true);<br>alter table crm_contacts add column if not exists verif_data text;</div>
     </div>
 
     <div class="form-group">
@@ -2033,7 +2355,15 @@ alter table crm_contacts enable row level security;
 alter table crm_calls enable row level security;
 create policy "allow all" on crm_contacts for all using (true) with check (true);
 create policy "allow all" on crm_calls for all using (true) with check (true);
--- Om du redan har tabellen: lägg till kolumnen för företagskontroller
+-- Befintliga tabeller (du har redan dessa):
+alter table facebook_inlagg add column if not exists post_type text;
+alter table facebook_inlagg add column if not exists created_at bigint;
+alter table linkedin_kontakter add column if not exists contact_id text;
+alter table linkedin_kontakter add column if not exists created_at bigint;
+alter table facebook_inlagg enable row level security;
+alter table linkedin_kontakter enable row level security;
+create policy "allow all" on facebook_inlagg for all using (true) with check (true);
+create policy "allow all" on linkedin_kontakter for all using (true) with check (true);
 alter table crm_contacts add column if not exists verif_data text;`;
   navigator.clipboard.writeText(sql).then(() => showToast('✓ SQL kopierad!'));
 }
