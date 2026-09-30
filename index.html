@@ -650,6 +650,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
     Affärer
   </div>
+  <div class="nav-item" onclick="showPage('kundregister', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Kundregister
+  </div>
 
   <div class="sidebar-bottom">
     <div class="stats-mini" id="sidebarStats">Loading...</div>
@@ -1124,6 +1128,14 @@
   </div>
 </div>
 
+<!-- KUNDREGISTER PAGE -->
+<div class="page" id="page-kundregister">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Företag från avtal och företagskontroll</div>
+  </div>
+  <div id="kundregisterList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga kunder ännu</div></div>
+</div>
+
 <!-- AVTAL MODAL -->
 <div class="modal-overlay" id="avtalModal" onclick="if(event.target===this)closeModal('avtalModal')">
   <div class="modal-box" style="max-width:660px;max-height:92vh;overflow-y:auto;padding:28px">
@@ -1208,24 +1220,47 @@
 
 <!-- FAKTURA MODAL -->
 <div class="modal-overlay" id="fakturaModal" onclick="if(event.target===this)closeModal('fakturaModal')">
-  <div class="modal-box" style="max-width:460px">
-    <div class="modal-title">💰 Faktura</div>
-    <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="fForetag" type="text" placeholder="Företagsnamn" readonly style="background:var(--surface2)"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label class="form-label">Veckonummer</label><input class="form-input" id="fVecka" type="number" min="1" max="53" placeholder="t.ex. 42"></div>
-      <div class="form-group"><label class="form-label">Belopp (kr)</label><input class="form-input" id="fBelopp" type="number" placeholder="t.ex. 15000"></div>
+  <div class="modal-box" style="max-width:520px;max-height:92vh;overflow-y:auto;padding:28px">
+    <div class="modal-title">💰 Faktura till uthyraren</div>
+
+    <!-- Uthyrare info (read-only) -->
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:20px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">FAKTURERA TILL</div>
+      <div id="fUthyrareInfo" style="font-size:13px;line-height:1.8;color:var(--text)">–</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label class="form-label">Period från</label><input class="form-input" id="fPeriodStart" type="date"></div>
-      <div class="form-group"><label class="form-label">Period till</label><input class="form-input" id="fPeriodEnd" type="date"></div>
+
+    <!-- Uppdrag info (read-only) -->
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:20px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">AVSER UPPDRAG</div>
+      <div id="fUppdragInfo" style="font-size:13px;line-height:1.8;color:var(--text)">–</div>
     </div>
+
+    <!-- Belopp highlight -->
+    <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.3);border-radius:10px;padding:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);letter-spacing:.08em">FF-AVGIFT ATT FAKTURERA (INKL. MOMS)</div>
+        <div id="fBeloppDisplay" style="font-size:22px;font-weight:800;color:var(--orange);margin-top:4px">–</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-align:right">
+        <div id="fVeckaDisplay" style="font-size:15px;font-weight:700;color:var(--text)">–</div>
+        <div id="fPeriodDisplay">–</div>
+      </div>
+    </div>
+
+    <!-- Status (editable) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group"><label class="form-label">Faktura skickad</label><input class="form-input" id="fSkickad" type="date"></div>
       <div class="form-group"><label class="form-label">Betald</label><input class="form-input" id="fBetald" type="date"></div>
     </div>
+
     <input type="hidden" id="fEditId">
     <input type="hidden" id="fAvtalId">
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+    <input type="hidden" id="fForetag">
+    <input type="hidden" id="fVecka">
+    <input type="hidden" id="fBelopp">
+    <input type="hidden" id="fPeriodStart">
+    <input type="hidden" id="fPeriodEnd">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeModal('fakturaModal')">Avbryt</button>
       <button class="btn btn-danger btn-sm" id="fDeleteBtn" onclick="doDeleteFaktura()" style="display:none">🗑 Radera</button>
       <button class="btn btn-primary" onclick="saveFaktura()">Spara</button>
@@ -1542,7 +1577,7 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   el.classList.add('active');
-  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', social: 'Social Media', affarer: 'Affärer' };
+  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', social: 'Social Media', affarer: 'Affärer', kundregister: 'Kundregister' };
   document.getElementById('pageTitle').textContent = titles[id];
   renderAll();
 }
@@ -1555,6 +1590,7 @@ function renderAll() {
   renderFollowups();
   renderFbPosts();
   renderAffarer();
+  renderKundregister();
   renderSidebarStats();
 }
 
@@ -2730,6 +2766,49 @@ function renderAffarer() {
   renderFakturaList();
 }
 
+// ─── KUNDREGISTER ────────────────────────────────────────
+function renderKundregister() {
+  const el = document.getElementById('kundregisterList');
+  if (!el) return;
+  // Bygg kunder från avtal (inhyrare + uthyrare) och föreagskontroll
+  const kunder = {};
+  const addKund = (foretag, orgNr, kontakt, epost, telefon, roll, avtalId) => {
+    if (!foretag) return;
+    const key = (orgNr || foretag).toLowerCase();
+    if (!kunder[key]) kunder[key] = { foretag, orgNr, kontakt, epost, telefon, roller: [], avtalIds: [] };
+    if (roll && !kunder[key].roller.includes(roll)) kunder[key].roller.push(roll);
+    if (avtalId && !kunder[key].avtalIds.includes(avtalId)) kunder[key].avtalIds.push(avtalId);
+    if (!kunder[key].kontakt && kontakt) kunder[key].kontakt = kontakt;
+    if (!kunder[key].epost && epost) kunder[key].epost = epost;
+    if (!kunder[key].telefon && telefon) kunder[key].telefon = telefon;
+  };
+  avtalList2.forEach(a => {
+    addKund(a.inhyrare_foretag, a.inhyrare_org_nr, a.inhyrare_kontakt, a.inhyrare_epost, a.inhyrare_telefon, 'Inhyrare', a.id);
+    addKund(a.uthyrare_foretag, a.uthyrare_org_nr, a.uthyrare_kontakt, a.uthyrare_epost, a.uthyrare_telefon, 'Uthyrare', a.id);
+  });
+  kontroller.forEach(k => addKund(k.foretag, k.org_nr, null, null, null, null, null));
+  const list = Object.values(kunder).sort((a,b)=>a.foretag.localeCompare(b.foretag,'sv'));
+  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga kunder ännu — lägg till avtal under Affärer</div>'; return; }
+  el.innerHTML = `<div style="display:grid;gap:12px">${list.map(k=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start">
+      <div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">${k.foretag}</div>
+        ${k.orgNr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">Org.nr: ${k.orgNr}</div>`:''}
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          ${k.roller.map(r=>`<span style="font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:${r==='Inhyrare'?'rgba(37,99,235,0.1)':'rgba(249,115,22,0.1)'};color:${r==='Inhyrare'?'var(--accent)':'var(--orange)'}">${r}</span>`).join('')}
+        </div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.8">
+          ${k.kontakt?`👤 ${k.kontakt}<br>`:''}
+          ${k.epost?`✉ <a href="mailto:${k.epost}" style="color:var(--accent)">${k.epost}</a><br>`:''}
+          ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a>`:''}
+        </div>
+      </div>
+      <div style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
+        ${k.avtalIds.length?`${k.avtalIds.length} avtal`:''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+
 // ─── AFFÄRER: KONTROLL MODAL ─────────────────────────────
 function openKontrollModal(id) {
   const k = id ? kontroller.find(x=>x.id===id) : null;
@@ -3030,16 +3109,48 @@ async function generateWeeklyFakturor() {
 // ─── AFFÄRER: FAKTURA MODAL ──────────────────────────────
 function openFakturaModal(id, avtalId, foretag) {
   const f = id ? fakturorList.find(x=>x.id===id) : null;
-  document.getElementById('fForetag').value      = f?.foretag||foretag||'';
-  document.getElementById('fVecka').value        = f?.vecka_nr||'';
-  document.getElementById('fBelopp').value       = f?.belopp||'';
-  document.getElementById('fPeriodStart').value  = f?.period_start||'';
-  document.getElementById('fPeriodEnd').value    = f?.period_end||'';
-  document.getElementById('fSkickad').value      = f?.faktura_skickad||'';
-  document.getElementById('fBetald').value       = f?.faktura_betald||'';
-  document.getElementById('fEditId').value       = f?.id||'';
-  document.getElementById('fAvtalId').value      = f?.avtal_id||avtalId||'';
+  const aId = f?.avtal_id || avtalId;
+  const a = aId ? avtalList2.find(x=>x.id===aId) : null;
+
+  // Hidden fields (for saveFaktura)
+  document.getElementById('fForetag').value     = f?.foretag||foretag||a?.uthyrare_foretag||'';
+  document.getElementById('fVecka').value       = f?.vecka_nr||'';
+  document.getElementById('fBelopp').value      = f?.belopp||'';
+  document.getElementById('fPeriodStart').value = f?.period_start||'';
+  document.getElementById('fPeriodEnd').value   = f?.period_end||'';
+  document.getElementById('fSkickad').value     = f?.faktura_skickad||'';
+  document.getElementById('fBetald').value      = f?.faktura_betald||'';
+  document.getElementById('fEditId').value      = f?.id||'';
+  document.getElementById('fAvtalId').value     = aId||'';
   document.getElementById('fDeleteBtn').style.display = f ? '' : 'none';
+
+  // Uthyrare info block
+  const uth = a ? [
+    `<strong>${a.uthyrare_foretag||'–'}</strong>`,
+    a.uthyrare_org_nr ? `Org.nr: ${a.uthyrare_org_nr}` : '',
+    a.uthyrare_kontakt ? `Kontakt: ${a.uthyrare_kontakt}` : '',
+    a.uthyrare_epost ? `E-post: <a href="mailto:${a.uthyrare_epost}" style="color:var(--accent)">${a.uthyrare_epost}</a>` : '',
+    a.uthyrare_fakturaadress ? `Fakturaadress: ${a.uthyrare_fakturaadress}` : '',
+    a.uthyrare_faktura_epost ? `Faktura e-post: <a href="mailto:${a.uthyrare_faktura_epost}" style="color:var(--accent)">${a.uthyrare_faktura_epost}</a>` : '',
+  ].filter(Boolean).join('<br>') : (foretag || '–');
+  document.getElementById('fUthyrareInfo').innerHTML = uth;
+
+  // Uppdrag info block
+  const uppdrag = a ? [
+    a.yrkesroll ? `${a.yrkesroll}${a.resurs?' – '+a.resurs:''}` : '',
+    a.arbetsplats ? `Arbetsplats: ${a.arbetsplats}` : '',
+    (a.period_start||a.period_end) ? `Period: ${a.period_start||'–'} → ${a.period_end||'–'}` : '',
+    a.timmar_totalt ? `Timmar totalt: ${a.timmar_totalt} h à ${a.timpris||'?'} kr/h` : '',
+    a.match_id ? `Match-ID: ${a.match_id}` : '',
+  ].filter(Boolean).join('<br>') : '–';
+  document.getElementById('fUppdragInfo').innerHTML = uppdrag;
+
+  // Belopp / vecka display
+  const bel = parseFloat(f?.belopp_uthyrare)||0;
+  document.getElementById('fBeloppDisplay').textContent = bel ? bel.toLocaleString('sv-SE') + ' kr' : '–';
+  document.getElementById('fVeckaDisplay').textContent = f?.vecka_nr ? 'Vecka ' + f.vecka_nr : '–';
+  document.getElementById('fPeriodDisplay').textContent = (f?.period_start && f?.period_end) ? f.period_start + ' → ' + f.period_end : '–';
+
   document.getElementById('fakturaModal').classList.add('open');
 }
 async function saveFaktura() {
