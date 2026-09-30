@@ -646,6 +646,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
     Social Media
   </div>
+  <div class="nav-item" onclick="showPage('affarer', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+    Affärer
+  </div>
 
   <div class="sidebar-bottom">
     <div class="stats-mini" id="sidebarStats">Loading...</div>
@@ -1038,6 +1042,142 @@
   <div id="fbPostList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga inlägg registrerade ännu</div></div>
 </div>
 
+<!-- AFFÄRER PAGE -->
+<div class="page" id="page-affarer">
+  <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border)">
+    <button onclick="showAffSub('kontroll',this)" id="affBtn-kontroll" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px">Kontroll</button>
+    <button onclick="showAffSub('avtal',this)" id="affBtn-avtal" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted2);border-bottom:2px solid transparent;margin-bottom:-2px">Avtal</button>
+    <button onclick="showAffSub('faktura',this)" id="affBtn-faktura" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted2);border-bottom:2px solid transparent;margin-bottom:-2px">Fakturering</button>
+  </div>
+
+  <!-- KONTROLL -->
+  <div id="affSec-kontroll">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:700">Företagskontroll</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">ID · F-skatt · Försäkring · Skulder</div>
+      </div>
+      <button class="btn btn-primary" onclick="openKontrollModal(null)">+ Ny kontroll</button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto">
+      <div id="kontrollList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
+    </div>
+  </div>
+
+  <!-- AVTAL -->
+  <div id="affSec-avtal" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:700">Avtal</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Inhyrare &amp; Uthyrare — avtal efter match</div>
+      </div>
+      <button class="btn btn-primary" onclick="openAvtalModal(null)">+ Nytt avtal</button>
+    </div>
+    <div id="avtalCards"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
+  </div>
+
+  <!-- FAKTURERING -->
+  <div id="affSec-faktura" style="display:none">
+    <div style="margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700">Fakturering</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Veckovis fakturering per uppdrag</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px" id="fakturaKpi"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+      <div id="fakturaList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- KONTROLL MODAL -->
+<div class="modal-overlay" id="kontrollModal" onclick="if(event.target===this)closeModal('kontrollModal')">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-title">✅ Företagskontroll</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="kForetag" type="text" placeholder="Företagsnamn"></div>
+      <div class="form-group"><label class="form-label">Org.nr</label><input class="form-input" id="kOrgNr" type="text" placeholder="556xxx-xxxx"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Steg</label>
+      <select class="form-input" id="kStage">
+        <option value="registrering">Registrering</option>
+        <option value="annons">Annons</option>
+        <option value="match">Match</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px;background:var(--surface2);border-radius:6px"><input type="checkbox" id="kIdentitet" style="width:15px;height:15px;accent-color:var(--accent)"> Identitet OK</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px;background:var(--surface2);border-radius:6px"><input type="checkbox" id="kFskatt" style="width:15px;height:15px;accent-color:var(--accent)"> F-skatt OK</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px;background:var(--surface2);border-radius:6px"><input type="checkbox" id="kForsaking" style="width:15px;height:15px;accent-color:var(--accent)"> Försäkring mottagen</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px;background:var(--surface2);border-radius:6px"><input type="checkbox" id="kSkulder" style="width:15px;height:15px;accent-color:var(--accent)"> Skulder kontrollerade</label>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Datum</label><input class="form-input" id="kDatum" type="date"></div>
+      <div class="form-group"><label class="form-label">Kontrollerad av</label><input class="form-input" id="kKontrolleradAv" type="text" placeholder="Namn"></div>
+    </div>
+    <input type="hidden" id="kEditId">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('kontrollModal')">Avbryt</button>
+      <button class="btn btn-danger btn-sm" id="kDeleteBtn" onclick="doDeleteKontroll()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-primary" onclick="saveKontroll()">Spara</button>
+    </div>
+  </div>
+</div>
+
+<!-- AVTAL MODAL -->
+<div class="modal-overlay" id="avtalModal" onclick="if(event.target===this)closeModal('avtalModal')">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-title">📄 Avtal</div>
+    <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="aForetag" type="text" placeholder="Företagsnamn"></div>
+    <div class="form-group">
+      <label class="form-label">Typ av avtal</label>
+      <select class="form-input" id="aTyp">
+        <option value="inhyrare">Inhyrare — de hyr in personal</option>
+        <option value="uthyrare">Uthyrare — de hyr ut personal</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Match datum</label><input class="form-input" id="aMatchDatum" type="date"></div>
+      <div class="form-group"><label class="form-label">Avtal skickat</label><input class="form-input" id="aSkickat" type="date"></div>
+      <div class="form-group"><label class="form-label">Signerat</label><input class="form-input" id="aSignerat" type="date"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Anteckningar</label><textarea class="form-input" id="aNotes" rows="3" placeholder="Uppdragets omfattning, villkor..."></textarea></div>
+    <input type="hidden" id="aEditId">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('avtalModal')">Avbryt</button>
+      <button class="btn btn-danger btn-sm" id="aDeleteBtn" onclick="doDeleteAvtal()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-primary" onclick="saveAvtal()">Spara</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAKTURA MODAL -->
+<div class="modal-overlay" id="fakturaModal" onclick="if(event.target===this)closeModal('fakturaModal')">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-title">💰 Faktura</div>
+    <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="fForetag" type="text" placeholder="Företagsnamn" readonly style="background:var(--surface2)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Veckonummer</label><input class="form-input" id="fVecka" type="number" min="1" max="53" placeholder="t.ex. 42"></div>
+      <div class="form-group"><label class="form-label">Belopp (kr)</label><input class="form-input" id="fBelopp" type="number" placeholder="t.ex. 15000"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Period från</label><input class="form-input" id="fPeriodStart" type="date"></div>
+      <div class="form-group"><label class="form-label">Period till</label><input class="form-input" id="fPeriodEnd" type="date"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Faktura skickad</label><input class="form-input" id="fSkickad" type="date"></div>
+      <div class="form-group"><label class="form-label">Betald</label><input class="form-input" id="fBetald" type="date"></div>
+    </div>
+    <input type="hidden" id="fEditId">
+    <input type="hidden" id="fAvtalId">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('fakturaModal')">Avbryt</button>
+      <button class="btn btn-danger btn-sm" id="fDeleteBtn" onclick="doDeleteFaktura()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-primary" onclick="saveFaktura()">Spara</button>
+    </div>
+  </div>
+</div>
+
 <!-- FACEBOOK MODAL -->
 <div class="modal-overlay" id="fbModal" onclick="if(event.target===this)closeModal('fbModal')">
   <div class="modal-box" style="max-width:540px">
@@ -1155,6 +1295,10 @@ let contacts = [];
 let calls = [];
 let fbPosts = [];
 let liKontakter = [];
+let kontroller = [];
+let avtalList2 = [];
+let fakturorList = [];
+let affSub = 'kontroll';
 let fbFilter = 'alla';
 let currentContactId = null;
 let currentFilter = 'all';
@@ -1262,11 +1406,14 @@ async function sbDeleteLinkedinKontaktDb(id) {
 async function loadFromSupabase() {
   setStatus('syncing');
   try {
-    const [c, cl, fb, li] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter()]);
+    const [c, cl, fb, li, kk, av, fak] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter(), sbGetKontroller(), sbGetAvtal2(), sbGetFakturor()]);
     contacts     = c || [];
     calls        = cl || [];
     fbPosts      = fb || [];
     liKontakter  = li || [];
+    kontroller   = kk || [];
+    avtalList2   = av || [];
+    fakturorList = fak || [];
     lastSyncHash = JSON.stringify([contacts, calls]);
     setStatus('ok');
     renderAll();
@@ -1293,9 +1440,12 @@ function startPolling() {
   syncTimer = setInterval(async () => {
     if (!SUPABASE_URL) return;
     try {
-      const [c, cl, fb, li] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter()]);
-      fbPosts     = fb || [];
-      liKontakter = li || [];
+      const [c, cl, fb, li, kk, av, fak] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter(), sbGetKontroller(), sbGetAvtal2(), sbGetFakturor()]);
+      fbPosts      = fb || [];
+      liKontakter  = li || [];
+      kontroller   = kk || [];
+      avtalList2   = av || [];
+      fakturorList = fak || [];
       const hash = JSON.stringify([c, cl]);
       if (hash !== lastSyncHash) {
         contacts = c || [];
@@ -1337,7 +1487,7 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   el.classList.add('active');
-  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', social: 'Social Media' };
+  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', social: 'Social Media', affarer: 'Affärer' };
   document.getElementById('pageTitle').textContent = titles[id];
   renderAll();
 }
@@ -1349,6 +1499,7 @@ function renderAll() {
   renderCalls();
   renderFollowups();
   renderFbPosts();
+  renderAffarer();
   renderSidebarStats();
 }
 
@@ -1916,7 +2067,17 @@ alter table crm_calls enable row level security;
 create policy "allow all" on crm_contacts for all using (true) with check (true);
 create policy "allow all" on crm_calls for all using (true) with check (true);
 -- Om du redan har tabellen: lägg till kolumnen för företagskontroller
-alter table crm_contacts add column if not exists verif_data text;`;
+alter table crm_contacts add column if not exists verif_data text;
+-- Affärer (nya tabeller):
+create table if not exists foretagskontroll (id text primary key, foretag text, org_nr text, stage text, identitet_ok boolean default false, f_skatt_ok boolean default false, forsaking_mottagen boolean default false, skulder_kontrollerade boolean default false, datum date, kontrollerad_av text, created_at bigint);
+create table if not exists avtal (id text primary key, foretag text, typ text, match_datum date, skickat_datum date, signerat_datum date, notes text, created_at bigint);
+create table if not exists fakturor (id text primary key, avtal_id text, foretag text, vecka_nr integer, belopp numeric, period_start date, period_end date, faktura_skickad date, faktura_betald date, created_at bigint);
+alter table foretagskontroll enable row level security;
+alter table avtal enable row level security;
+alter table fakturor enable row level security;
+create policy "allow all" on foretagskontroll for all using (true) with check (true);
+create policy "allow all" on avtal for all using (true) with check (true);
+create policy "allow all" on fakturor for all using (true) with check (true);`;
   navigator.clipboard.writeText(sql);
   showToast('✓ SQL kopierad!');
 }
@@ -2298,6 +2459,353 @@ async function deleteFbPost() {
   }
 }
 
+// ─── AFFÄRER: SUPABASE ──────────────────────────────────
+async function sbGetKontroller() {
+  try {
+    const { data, error } = await getSB().from('foretagskontroll').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch { return []; }
+}
+async function sbSaveKontroll(k) {
+  const { error } = await getSB().from('foretagskontroll').upsert([k]);
+  if (error) throw new Error(error.message);
+}
+async function sbDeleteKontrollDb(id) {
+  await getSB().from('foretagskontroll').delete().eq('id', id);
+}
+async function sbGetAvtal2() {
+  try {
+    const { data, error } = await getSB().from('avtal').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch { return []; }
+}
+async function sbSaveAvtal2(a) {
+  const { error } = await getSB().from('avtal').upsert([a]);
+  if (error) throw new Error(error.message);
+}
+async function sbDeleteAvtalDb(id) {
+  await getSB().from('avtal').delete().eq('id', id);
+}
+async function sbGetFakturor() {
+  try {
+    const { data, error } = await getSB().from('fakturor').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch { return []; }
+}
+async function sbSaveFaktura(f) {
+  const { error } = await getSB().from('fakturor').upsert([f]);
+  if (error) throw new Error(error.message);
+}
+async function sbDeleteFakturaDb(id) {
+  await getSB().from('fakturor').delete().eq('id', id);
+}
+
+// ─── AFFÄRER: SUB-TAB ───────────────────────────────────
+function showAffSub(sub, btn) {
+  affSub = sub;
+  ['kontroll','avtal','faktura'].forEach(s => {
+    const sec = document.getElementById('affSec-'+s);
+    const b   = document.getElementById('affBtn-'+s);
+    if (sec) sec.style.display = s === sub ? '' : 'none';
+    if (b) {
+      b.style.color = s === sub ? 'var(--accent)' : 'var(--muted2)';
+      b.style.borderBottom = s === sub ? '2px solid var(--accent)' : '2px solid transparent';
+    }
+  });
+}
+
+// ─── AFFÄRER: RENDER ────────────────────────────────────
+function stageColor(s) {
+  return { registrering: '#6366f1', annons: '#f97316', match: '#22c55e' }[s] || '#9aa0b8';
+}
+
+function renderKontroller() {
+  const el = document.getElementById('kontrollList');
+  if (!el) return;
+  if (!kontroller.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace">Inga kontroller registrerade</div>';
+    return;
+  }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
+    <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
+      <th style="padding:8px 6px;text-align:left;font-weight:500">Företag</th>
+      <th style="padding:8px 6px;text-align:left;font-weight:500">Org.nr</th>
+      <th style="padding:8px 6px;text-align:left;font-weight:500">Steg</th>
+      <th style="padding:8px 6px;text-align:center;font-weight:500" title="Identitet OK">ID</th>
+      <th style="padding:8px 6px;text-align:center;font-weight:500" title="F-skatt OK">F-skatt</th>
+      <th style="padding:8px 6px;text-align:center;font-weight:500" title="Försäkring mottagen">Försäkr.</th>
+      <th style="padding:8px 6px;text-align:center;font-weight:500" title="Skulder kontrollerade">Skulder</th>
+      <th style="padding:8px 6px;text-align:left;font-weight:500">Datum</th>
+      <th style="padding:8px 6px;text-align:left;font-weight:500">Kontrollerad av</th>
+      <th></th>
+    </tr></thead>
+    <tbody>${kontroller.map(k => `
+      <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="openKontrollModal('${k.id}')">
+        <td style="padding:8px 6px;font-weight:600">${k.foretag||'–'}</td>
+        <td style="padding:8px 6px;color:var(--muted2)">${k.org_nr||'–'}</td>
+        <td style="padding:8px 6px"><span style="background:${stageColor(k.stage)};color:#fff;border-radius:4px;padding:2px 7px;font-size:10px">${k.stage||'–'}</span></td>
+        <td style="padding:8px 6px;text-align:center;font-size:14px">${k.identitet_ok?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--muted)">–</span>'}</td>
+        <td style="padding:8px 6px;text-align:center;font-size:14px">${k.f_skatt_ok?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--muted)">–</span>'}</td>
+        <td style="padding:8px 6px;text-align:center;font-size:14px">${k.forsaking_mottagen?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--muted)">–</span>'}</td>
+        <td style="padding:8px 6px;text-align:center;font-size:14px">${k.skulder_kontrollerade?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--muted)">–</span>'}</td>
+        <td style="padding:8px 6px;color:var(--muted2)">${k.datum||'–'}</td>
+        <td style="padding:8px 6px;color:var(--muted2)">${k.kontrollerad_av||'–'}</td>
+        <td style="padding:8px 6px;text-align:right"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();doDeleteKontroll('${k.id}')" style="color:var(--red);font-size:10px;padding:2px 6px">✕</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function renderAvtalCards() {
+  const el = document.getElementById('avtalCards');
+  if (!el) return;
+  if (!avtalList2.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace">Inga avtal registrerade</div>';
+    return;
+  }
+  el.innerHTML = avtalList2.map(a => {
+    const typColor = a.typ === 'inhyrare' ? 'var(--accent)' : 'var(--orange)';
+    const typLabel = a.typ === 'inhyrare' ? 'Inhyrare' : 'Uthyrare';
+    const faks = fakturorList.filter(f => f.avtal_id === a.id);
+    const totalt = faks.reduce((s,f) => s + (parseFloat(f.belopp)||0), 0);
+    const betalda = faks.filter(f => f.faktura_betald).reduce((s,f) => s + (parseFloat(f.belopp)||0), 0);
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <span style="font-weight:700;font-size:15px">${a.foretag||'–'}</span>
+          <span style="margin-left:10px;background:${typColor};color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600">${typLabel}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="openFakturaModal(null,'${a.id}','${a.foretag||''}')" style="font-size:10px">+ Faktura</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAvtalModal('${a.id}')" style="font-size:10px">✏ Redigera</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)">
+        <span>Match: <strong style="color:var(--text)">${a.match_datum||'–'}</strong></span>
+        <span>Avtal skickat: <strong style="color:var(--text)">${a.skickat_datum||'–'}</strong></span>
+        <span>Signerat: <strong style="color:${a.signerat_datum?'var(--green)':'var(--muted)'}">${a.signerat_datum||'–'}</strong></span>
+      </div>
+      ${a.notes?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">${a.notes}</div>`:''}
+      ${faks.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;display:flex;gap:16px">
+        <span>📋 ${faks.length} faktura${faks.length>1?'r':''}</span>
+        <span>Totalt: <strong>${totalt.toLocaleString('sv-SE')} kr</strong></span>
+        <span>Betalt: <strong style="color:var(--green)">${betalda.toLocaleString('sv-SE')} kr</strong></span>
+        ${totalt-betalda>0?`<span>Utestående: <strong style="color:var(--orange)">${(totalt-betalda).toLocaleString('sv-SE')} kr</strong></span>`:''}
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderFakturaList() {
+  const kpiEl = document.getElementById('fakturaKpi');
+  const listEl = document.getElementById('fakturaList');
+  if (!kpiEl || !listEl) return;
+  const totalt = fakturorList.reduce((s,f) => s+(parseFloat(f.belopp)||0), 0);
+  const betalt = fakturorList.filter(f=>f.faktura_betald).reduce((s,f) => s+(parseFloat(f.belopp)||0), 0);
+  const ej_skickat = fakturorList.filter(f=>!f.faktura_skickad).length;
+  kpiEl.innerHTML = [
+    ['Totalt fakturerat', totalt.toLocaleString('sv-SE') + ' kr', 'var(--accent)'],
+    ['Betalt', betalt.toLocaleString('sv-SE') + ' kr', 'var(--green)'],
+    ['Ej skickade', ej_skickat + ' st', ej_skickat>0 ? 'var(--orange)' : 'var(--muted)'],
+  ].map(([label,val,col]) => `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px">
+    <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:4px">${label}</div>
+    <div style="font-size:18px;font-weight:700;color:${col}">${val}</div>
+  </div>`).join('');
+
+  if (!fakturorList.length) {
+    listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace">Inga fakturor registrerade — lägg till via Avtal-fliken</div>';
+    return;
+  }
+  // group by avtal_id
+  const groups = {};
+  fakturorList.forEach(f => {
+    const key = f.avtal_id || 'fristående';
+    if (!groups[key]) groups[key] = { foretag: f.foretag || key, rows: [] };
+    groups[key].rows.push(f);
+  });
+  listEl.innerHTML = Object.entries(groups).map(([avtalId, g]) => {
+    const rows = g.rows.slice().sort((a,b)=>(a.vecka_nr||0)-(b.vecka_nr||0));
+    return `<div style="margin-bottom:24px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        ${g.foretag}
+        <button class="btn btn-ghost btn-sm" onclick="openFakturaModal(null,'${avtalId}','${g.foretag}')" style="font-size:10px">+ Vecka</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
+        <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Vecka</th>
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Period</th>
+          <th style="padding:6px 4px;text-align:right;font-weight:500">Belopp</th>
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Faktura skickad</th>
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Betald</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${rows.map(f=>`
+          <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="openFakturaModal('${f.id}')">
+            <td style="padding:7px 4px;font-weight:600">V${f.vecka_nr||'?'}</td>
+            <td style="padding:7px 4px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
+            <td style="padding:7px 4px;text-align:right;font-weight:600">${f.belopp?parseFloat(f.belopp).toLocaleString('sv-SE')+' kr':'–'}</td>
+            <td style="padding:7px 4px">${f.faktura_skickad?`<span style="color:var(--accent)">✓ ${f.faktura_skickad}</span>`:'<span style="color:var(--muted)">Ej skickad</span>'}</td>
+            <td style="padding:7px 4px">${f.faktura_betald?`<span style="color:var(--green)">✓ ${f.faktura_betald}</span>`:'<span style="color:var(--muted)">Ej betald</span>'}</td>
+            <td style="padding:7px 4px;text-align:right"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();doDeleteFaktura('${f.id}')" style="color:var(--red);font-size:10px;padding:2px 6px">✕</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+function renderAffarer() {
+  renderKontroller();
+  renderAvtalCards();
+  renderFakturaList();
+}
+
+// ─── AFFÄRER: KONTROLL MODAL ─────────────────────────────
+function openKontrollModal(id) {
+  const k = id ? kontroller.find(x=>x.id===id) : null;
+  document.getElementById('kForetag').value       = k?.foretag||'';
+  document.getElementById('kOrgNr').value         = k?.org_nr||'';
+  document.getElementById('kStage').value         = k?.stage||'registrering';
+  document.getElementById('kIdentitet').checked   = !!k?.identitet_ok;
+  document.getElementById('kFskatt').checked      = !!k?.f_skatt_ok;
+  document.getElementById('kForsaking').checked   = !!k?.forsaking_mottagen;
+  document.getElementById('kSkulder').checked     = !!k?.skulder_kontrollerade;
+  document.getElementById('kDatum').value         = k?.datum||new Date().toISOString().split('T')[0];
+  document.getElementById('kKontrolleradAv').value= k?.kontrollerad_av||USER_NAME||'';
+  document.getElementById('kEditId').value        = k?.id||'';
+  document.getElementById('kDeleteBtn').style.display = k ? '' : 'none';
+  document.getElementById('kontrollModal').style.display='flex';
+}
+async function saveKontroll() {
+  const id = document.getElementById('kEditId').value || genId();
+  const row = {
+    id, foretag: document.getElementById('kForetag').value.trim(),
+    org_nr: document.getElementById('kOrgNr').value.trim(),
+    stage: document.getElementById('kStage').value,
+    identitet_ok: document.getElementById('kIdentitet').checked,
+    f_skatt_ok: document.getElementById('kFskatt').checked,
+    forsaking_mottagen: document.getElementById('kForsaking').checked,
+    skulder_kontrollerade: document.getElementById('kSkulder').checked,
+    datum: document.getElementById('kDatum').value,
+    kontrollerad_av: document.getElementById('kKontrolleradAv').value.trim(),
+    created_at: Date.now()
+  };
+  if (!row.foretag) { showToast('Ange företagsnamn'); return; }
+  try {
+    await sbSaveKontroll(row);
+    const idx = kontroller.findIndex(x=>x.id===id);
+    if (idx>=0) kontroller[idx]=row; else kontroller.unshift(row);
+    closeModal('kontrollModal');
+    renderKontroller();
+    showToast('✓ Kontroll sparad');
+  } catch(e) { showToast('Fel: '+e.message); }
+}
+async function doDeleteKontroll(id) {
+  const eid = id || document.getElementById('kEditId').value;
+  if (!eid || !confirm('Radera kontroll?')) return;
+  await sbDeleteKontrollDb(eid);
+  kontroller = kontroller.filter(x=>x.id!==eid);
+  closeModal('kontrollModal');
+  renderKontroller();
+  showToast('Kontroll raderad');
+}
+
+// ─── AFFÄRER: AVTAL MODAL ───────────────────────────────
+function openAvtalModal(id) {
+  const a = id ? avtalList2.find(x=>x.id===id) : null;
+  document.getElementById('aForetag').value    = a?.foretag||'';
+  document.getElementById('aTyp').value        = a?.typ||'inhyrare';
+  document.getElementById('aMatchDatum').value = a?.match_datum||'';
+  document.getElementById('aSkickat').value    = a?.skickat_datum||'';
+  document.getElementById('aSignerat').value   = a?.signerat_datum||'';
+  document.getElementById('aNotes').value      = a?.notes||'';
+  document.getElementById('aEditId').value     = a?.id||'';
+  document.getElementById('aDeleteBtn').style.display = a ? '' : 'none';
+  document.getElementById('avtalModal').style.display='flex';
+}
+async function saveAvtal() {
+  const id = document.getElementById('aEditId').value || genId();
+  const row = {
+    id, foretag: document.getElementById('aForetag').value.trim(),
+    typ: document.getElementById('aTyp').value,
+    match_datum: document.getElementById('aMatchDatum').value||null,
+    skickat_datum: document.getElementById('aSkickat').value||null,
+    signerat_datum: document.getElementById('aSignerat').value||null,
+    notes: document.getElementById('aNotes').value.trim(),
+    created_at: Date.now()
+  };
+  if (!row.foretag) { showToast('Ange företagsnamn'); return; }
+  try {
+    await sbSaveAvtal2(row);
+    const idx = avtalList2.findIndex(x=>x.id===id);
+    if (idx>=0) avtalList2[idx]=row; else avtalList2.unshift(row);
+    closeModal('avtalModal');
+    renderAvtalCards();
+    showToast('✓ Avtal sparat');
+  } catch(e) { showToast('Fel: '+e.message); }
+}
+async function doDeleteAvtal() {
+  const id = document.getElementById('aEditId').value;
+  if (!id || !confirm('Radera avtal?')) return;
+  await sbDeleteAvtalDb(id);
+  avtalList2 = avtalList2.filter(x=>x.id!==id);
+  closeModal('avtalModal');
+  renderAvtalCards();
+  showToast('Avtal raderat');
+}
+
+// ─── AFFÄRER: FAKTURA MODAL ──────────────────────────────
+function openFakturaModal(id, avtalId, foretag) {
+  const f = id ? fakturorList.find(x=>x.id===id) : null;
+  document.getElementById('fForetag').value      = f?.foretag||foretag||'';
+  document.getElementById('fVecka').value        = f?.vecka_nr||'';
+  document.getElementById('fBelopp').value       = f?.belopp||'';
+  document.getElementById('fPeriodStart').value  = f?.period_start||'';
+  document.getElementById('fPeriodEnd').value    = f?.period_end||'';
+  document.getElementById('fSkickad').value      = f?.faktura_skickad||'';
+  document.getElementById('fBetald').value       = f?.faktura_betald||'';
+  document.getElementById('fEditId').value       = f?.id||'';
+  document.getElementById('fAvtalId').value      = f?.avtal_id||avtalId||'';
+  document.getElementById('fDeleteBtn').style.display = f ? '' : 'none';
+  document.getElementById('fakturaModal').style.display='flex';
+}
+async function saveFaktura() {
+  const id = document.getElementById('fEditId').value || genId();
+  const row = {
+    id, foretag: document.getElementById('fForetag').value.trim(),
+    avtal_id: document.getElementById('fAvtalId').value||null,
+    vecka_nr: parseInt(document.getElementById('fVecka').value)||null,
+    belopp: parseFloat(document.getElementById('fBelopp').value)||null,
+    period_start: document.getElementById('fPeriodStart').value||null,
+    period_end: document.getElementById('fPeriodEnd').value||null,
+    faktura_skickad: document.getElementById('fSkickad').value||null,
+    faktura_betald: document.getElementById('fBetald').value||null,
+    created_at: Date.now()
+  };
+  try {
+    await sbSaveFaktura(row);
+    const idx = fakturorList.findIndex(x=>x.id===id);
+    if (idx>=0) fakturorList[idx]=row; else fakturorList.unshift(row);
+    closeModal('fakturaModal');
+    renderAvtalCards();
+    renderFakturaList();
+    showToast('✓ Faktura sparad');
+  } catch(e) { showToast('Fel: '+e.message); }
+}
+async function doDeleteFaktura(id) {
+  const eid = id || document.getElementById('fEditId').value;
+  if (!eid || !confirm('Radera faktura?')) return;
+  await sbDeleteFakturaDb(eid);
+  fakturorList = fakturorList.filter(x=>x.id!==eid);
+  closeModal('fakturaModal');
+  renderAvtalCards();
+  renderFakturaList();
+  showToast('Faktura raderad');
+}
+
 // ─── INIT ───────────────────────────────────────────────
 function init() {
   if (!SUPABASE_URL || !SUPABASE_KEY || !USER_NAME) {
@@ -2327,7 +2835,7 @@ document.addEventListener('DOMContentLoaded', init);
 
     <div style="background:#1a1d2e;border-radius:8px;padding:14px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:11px;color:#a8b2d8;line-height:1.8;position:relative">
       <button onclick="copySql()" style="position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">Kopiera SQL</button>
-      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);<br><span style="color:var(--muted)">-- Befintliga tabeller (du har redan dessa):</span><br>alter table facebook_inlagg add column if not exists post_type text;<br>alter table facebook_inlagg add column if not exists created_at bigint;<br>alter table linkedin_kontakter add column if not exists contact_id text;<br>alter table linkedin_kontakter add column if not exists created_at bigint;<br>alter table facebook_inlagg enable row level security;<br>alter table linkedin_kontakter enable row level security;<br>create policy "allow all" on facebook_inlagg for all using (true) with check (true);<br>create policy "allow all" on linkedin_kontakter for all using (true) with check (true);<br>alter table crm_contacts add column if not exists verif_data text;</div>
+      <div id="sqlCode">create table if not exists crm_contacts (id text primary key, company text, name text, phone text, email text, status text, industry text, notes text, last_called text, followup_date text, verif_data text, created_at bigint);<br>create table if not exists crm_calls (id text primary key, contact_id text, created_at bigint, outcome text, notes text, followup_date text, user_name text);<br>alter table crm_contacts enable row level security;<br>alter table crm_calls enable row level security;<br>create policy "allow all" on crm_contacts for all using (true) with check (true);<br>create policy "allow all" on crm_calls for all using (true) with check (true);<br><span style="color:var(--muted)">-- Befintliga tabeller (du har redan dessa):</span><br>alter table facebook_inlagg add column if not exists post_type text;<br>alter table facebook_inlagg add column if not exists created_at bigint;<br>alter table linkedin_kontakter add column if not exists contact_id text;<br>alter table linkedin_kontakter add column if not exists created_at bigint;<br>alter table facebook_inlagg enable row level security;<br>alter table linkedin_kontakter enable row level security;<br>create policy "allow all" on facebook_inlagg for all using (true) with check (true);<br>create policy "allow all" on linkedin_kontakter for all using (true) with check (true);<br>alter table crm_contacts add column if not exists verif_data text;<br>-- Affärer (nya tabeller):<br>create table if not exists foretagskontroll (id text primary key, foretag text, org_nr text, stage text, identitet_ok boolean default false, f_skatt_ok boolean default false, forsaking_mottagen boolean default false, skulder_kontrollerade boolean default false, datum date, kontrollerad_av text, created_at bigint);<br>create table if not exists avtal (id text primary key, foretag text, typ text, match_datum date, skickat_datum date, signerat_datum date, notes text, created_at bigint);<br>create table if not exists fakturor (id text primary key, avtal_id text, foretag text, vecka_nr integer, belopp numeric, period_start date, period_end date, faktura_skickad date, faktura_betald date, created_at bigint);<br>alter table foretagskontroll enable row level security;<br>alter table avtal enable row level security;<br>alter table fakturor enable row level security;<br>create policy "allow all" on foretagskontroll for all using (true) with check (true);<br>create policy "allow all" on avtal for all using (true) with check (true);<br>create policy "allow all" on fakturor for all using (true) with check (true);</div>
     </div>
 
     <div class="form-group">
