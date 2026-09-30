@@ -2746,7 +2746,7 @@ function openKontrollModal(id) {
   document.getElementById('kKontrolleradAv').value= k?.kontrollerad_av||USER_NAME||'';
   document.getElementById('kEditId').value        = k?.id||'';
   document.getElementById('kDeleteBtn').style.display = k ? '' : 'none';
-  document.getElementById('kontrollModal').style.display='flex';
+  document.getElementById('kontrollModal').classList.add('open');
 }
 async function saveKontroll() {
   const id = document.getElementById('kEditId').value || genId();
@@ -2840,7 +2840,7 @@ function openAvtalModal(id) {
   document.getElementById('aDeleteBtn').style.display = a ? '' : 'none';
   document.getElementById('aGenFakBtn').style.display = a ? '' : 'none';
   calcAvtalPris();
-  document.getElementById('avtalModal').style.display='flex';
+  document.getElementById('avtalModal').classList.add('open');
 }
 
 async function saveAvtal() {
@@ -2982,7 +2982,7 @@ function openFakturaModal(id, avtalId, foretag) {
   document.getElementById('fEditId').value       = f?.id||'';
   document.getElementById('fAvtalId').value      = f?.avtal_id||avtalId||'';
   document.getElementById('fDeleteBtn').style.display = f ? '' : 'none';
-  document.getElementById('fakturaModal').style.display='flex';
+  document.getElementById('fakturaModal').classList.add('open');
 }
 async function saveFaktura() {
   const id = document.getElementById('fEditId').value || genId();
