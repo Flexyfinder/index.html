@@ -1702,12 +1702,11 @@ function renderDashboard() {
       affEl.innerHTML = '<div class="empty-state" style="font-family:\'DM Mono\',monospace;font-size:12px">Inga fakturor att skicka ✓</div>';
     } else {
       affEl.innerHTML = `<table><thead><tr style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
-        <th style="padding:6px 8px">Nr</th><th style="padding:6px 8px">Uthyrare</th><th style="padding:6px 8px">Vecka</th><th style="padding:6px 8px">Period</th><th style="padding:6px 8px;text-align:right">FF-avgift</th><th></th>
+        <th style="padding:6px 8px">Nr</th><th style="padding:6px 8px">Uthyrare</th><th style="padding:6px 8px">Period</th><th style="padding:6px 8px;text-align:right">FF-avgift</th><th></th>
       </tr></thead><tbody>${attSkicka.map(f=>`
         <tr style="border-top:1px solid var(--border);cursor:pointer" onclick="showPage('affarer',document.querySelector('[onclick*=affarer]'));showAffSub('faktura',document.getElementById('affBtn-faktura'));openFakturaModal('${f.id}')">
           <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
           <td style="padding:7px 8px;font-weight:600;font-size:13px">${f.foretag||'–'}</td>
-          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px">${f.vecka_nr ? 'V'+f.vecka_nr : '–'}</td>
           <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
           <td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
           <td style="padding:7px 8px"><span style="background:var(--orange);color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace">Skicka</span></td>
@@ -2820,7 +2819,6 @@ function renderFakturaList() {
       <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
         <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
           <th style="padding:6px 4px;text-align:left;font-weight:500">FF-nr</th>
-          <th style="padding:6px 4px;text-align:left;font-weight:500">Vecka</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Period</th>
           <th style="padding:6px 4px;text-align:right;font-weight:500">FF-avgift exkl. moms</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Skickad</th>
@@ -2831,7 +2829,6 @@ function renderFakturaList() {
         <tbody>${rows.map(f=>`
           <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="openFakturaModal('${f.id}')">
             <td style="padding:7px 4px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
-            <td style="padding:7px 4px;font-weight:600">${f.vecka_nr ? 'V'+f.vecka_nr : '–'}</td>
             <td style="padding:7px 4px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
             <td style="padding:7px 4px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?Math.round(parseFloat(f.belopp_uthyrare)).toLocaleString('sv-SE')+' kr':'–'}</td>
             <td style="padding:7px 4px">${f.faktura_skickad?`<span style="color:var(--accent)">✓ ${f.faktura_skickad}</span>`:'<span style="color:var(--muted)">–</span>'}</td>
