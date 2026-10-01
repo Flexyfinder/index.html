@@ -1707,7 +1707,7 @@ function renderDashboard() {
         <tr style="border-top:1px solid var(--border);cursor:pointer" onclick="showPage('affarer',document.querySelector('[onclick*=affarer]'));showAffSub('faktura',document.getElementById('affBtn-faktura'));openFakturaModal('${f.id}')">
           <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
           <td style="padding:7px 8px;font-weight:600;font-size:13px">${f.foretag||'–'}</td>
-          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px">V${f.vecka_nr||'?'}</td>
+          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px">${f.vecka_nr ? 'V'+f.vecka_nr : '–'}</td>
           <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
           <td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
           <td style="padding:7px 8px"><span style="background:var(--orange);color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace">Skicka</span></td>
@@ -2815,7 +2815,7 @@ function renderFakturaList() {
     return `<div style="margin-bottom:24px">
       <div style="font-weight:700;font-size:13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
         ${g.foretag}
-        <button class="btn btn-ghost btn-sm" onclick="openFakturaModal(null,'${avtalId}','${g.foretag}')" style="font-size:10px">+ Vecka</button>
+        <button class="btn btn-ghost btn-sm" onclick="openFakturaModal(null,'${avtalId}','${g.foretag}')" style="font-size:10px">+ Faktura</button>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
         <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
@@ -2831,7 +2831,7 @@ function renderFakturaList() {
         <tbody>${rows.map(f=>`
           <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="openFakturaModal('${f.id}')">
             <td style="padding:7px 4px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
-            <td style="padding:7px 4px;font-weight:600">V${f.vecka_nr||'?'}</td>
+            <td style="padding:7px 4px;font-weight:600">${f.vecka_nr ? 'V'+f.vecka_nr : '–'}</td>
             <td style="padding:7px 4px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
             <td style="padding:7px 4px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?Math.round(parseFloat(f.belopp_uthyrare)).toLocaleString('sv-SE')+' kr':'–'}</td>
             <td style="padding:7px 4px">${f.faktura_skickad?`<span style="color:var(--accent)">✓ ${f.faktura_skickad}</span>`:'<span style="color:var(--muted)">–</span>'}</td>
@@ -3141,70 +3141,88 @@ async function generateWeeklyFakturor() {
     showToast('Ange period och timpris för att generera fakturor');
     return;
   }
+  // Varna om det redan finns fakturor
+  const existingRows = fakturorList.filter(f => f.avtal_id === a.id);
+  if (existingRows.length > 0) {
+    if (!confirm('Det finns redan ' + existingRows.length + ' faktura(or) för detta uppdrag. Generera ändå?')) return;
+  }
+
   const start = new Date(a.period_start);
-  const end = new Date(a.period_end);
+  const end   = new Date(a.period_end);
   const ffPct = parseFloat(a.ff_avgift_procent) || 8.5;
-  // Build per-week working-day counts
-  const weeks = {};
+
+  // ── Räkna arbetsdagar ──────────────────────────────────
+  // Samla per månad (key = "YYYY-MM") och per vecka (key = "YYYY-WW")
+  const months = {}; // för långa uppdrag
   const d = new Date(start);
   while (d <= end) {
     const dow = d.getDay();
     if (dow >= 1 && dow <= 5 && !isRedDay(d)) {
-      const wn = getISOWeek(d);
-      const yr = d.getFullYear();
-      const key = yr + '-' + String(wn).padStart(2,'0');
-      if (!weeks[key]) {
-        const mon = new Date(d);
-        mon.setDate(d.getDate() - (d.getDay()-1));
-        const fri = new Date(mon); fri.setDate(mon.getDate()+4);
-        const ps = mon < start ? new Date(start) : mon;
-        const pe = fri > end ? new Date(end) : fri;
-        weeks[key] = { vecka_nr: wn, days: 0, ps: ps.toISOString().split('T')[0], pe: pe.toISOString().split('T')[0] };
+      const mkey = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      if (!months[mkey]) {
+        months[mkey] = { days: 0, ps: d.toISOString().split('T')[0], pe: d.toISOString().split('T')[0] };
       }
-      weeks[key].days++;
+      months[mkey].days++;
+      months[mkey].pe = d.toISOString().split('T')[0]; // uppdatera sista dag
     }
     d.setDate(d.getDate()+1);
   }
-  const totalDays = Object.values(weeks).reduce((s,w)=>s+w.days, 0);
+  const totalDays = Object.values(months).reduce((s,m)=>s+m.days, 0);
+
+  // ── Beräkna total FF-avgift ────────────────────────────
   const persons = parseInt(a.antal_personer) || 1;
   const totHours = parseFloat(a.timmar_totalt) || 0;
-  const timpris = parseFloat(a.timpris) || 0;
+  const timpris  = parseFloat(a.timpris) || 0;
   const uppdragsvarde = persons * timpris * totHours;
   const avgiftRaw = uppdragsvarde * (ffPct / 100);
-  const totalAvgiftExkl = Math.max(Math.round(avgiftRaw), 995); // min 995 kr/uppdrag, exkl. moms
+  const totalAvgiftExkl = Math.max(Math.round(avgiftRaw), 995);
 
-  // Sortera veckor kronologiskt
-  const weekArr = Object.values(weeks).sort((a,b)=>a.ps.localeCompare(b.ps));
-  let distributed = 0;
-  weekArr.forEach((w, i) => {
-    const isLast = i === weekArr.length - 1;
-    w.avgiftExkl = isLast
-      ? totalAvgiftExkl - distributed
-      : Math.floor(totalAvgiftExkl * w.days / totalDays);
-    if (!isLast) distributed += w.avgiftExkl;
-  });
+  // ── Kort uppdrag (≤20 arbetsdagar = ≤4 veckor): 1 faktura ──
+  let periods = [];
+  if (totalDays <= 20) {
+    periods = [{
+      label: 'kort',
+      ps: a.period_start,
+      pe: a.period_end,
+      days: totalDays,
+      avgiftExkl: totalAvgiftExkl
+    }];
+  } else {
+    // ── Långt uppdrag: 1 faktura per kalendermånad ──────────
+    const monthArr = Object.entries(months).sort((a,b)=>a[0].localeCompare(b[0]));
+    let distributed = 0;
+    periods = monthArr.map(([key, m], i) => {
+      const isLast = i === monthArr.length - 1;
+      const avgiftExkl = isLast
+        ? totalAvgiftExkl - distributed
+        : Math.floor(totalAvgiftExkl * m.days / totalDays);
+      if (!isLast) distributed += avgiftExkl;
+      return { label: key, ps: m.ps, pe: m.pe, days: m.days, avgiftExkl };
+    });
+  }
 
+  // ── Skapa rader ───────────────────────────────────────
   const generated = [];
-  for (const w of weekArr) {
+  for (const p of periods) {
     const row = {
       id: genId(),
       avtal_id: a.id,
-      foretag: a.inhyrare_foretag || a.foretag,
-      vecka_nr: w.vecka_nr,
-      period_start: w.ps,
-      period_end: w.pe,
-      belopp_uthyrare: w.avgiftExkl, // exkl. moms — moms räknas i display
+      foretag: a.uthyrare_foretag || a.foretag,
+      period_start: p.ps,
+      period_end:   p.pe,
+      belopp_uthyrare: p.avgiftExkl,
       faktura_nr: nextFakturaNr(),
       created_at: Date.now()
     };
-    fakturorList.unshift(row); // add first so nextFakturaNr() sees it
+    fakturorList.unshift(row);
     try { await sbSaveFaktura(row); generated.push(row); } catch { fakturorList.shift(); }
   }
   closeModal('avtalModal');
   renderFakturaList();
   renderAvtalCards();
   showAffSub('faktura', document.getElementById('affBtn-faktura'));
-  showToast('✓ ' + generated.length + ' faktura' + (generated.length!==1?'r':'') + ' genererade');
+  const typ = totalDays <= 20 ? 'kort uppdrag' : 'månadsvis';
+  showToast('✓ ' + generated.length + ' faktura' + (generated.length!==1?'r':'') + ' genererade (' + typ + ')');
 }
 
 // ─── AFFÄRER: FAKTURA MODAL ──────────────────────────────
