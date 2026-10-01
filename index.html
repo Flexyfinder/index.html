@@ -713,6 +713,20 @@
       <div class="table-wrap" id="dashRecentCalls">
         <div class="empty-state">No calls logged yet</div>
       </div>
+
+      <div class="section-header" style="margin-top:28px">
+        <div class="section-title">🧾 Att fakturera</div>
+      </div>
+      <div class="table-wrap" id="dashAttFakturera">
+        <div class="empty-state" style="font-family:'DM Mono',monospace;font-size:12px">Inga fakturor att skicka</div>
+      </div>
+
+      <div class="section-header" style="margin-top:24px">
+        <div class="section-title">⚠️ Försenade betalningar</div>
+      </div>
+      <div class="table-wrap" id="dashForsenade">
+        <div class="empty-state" style="font-family:'DM Mono',monospace;font-size:12px">Inga försenade</div>
+      </div>
     </div>
 
     <!-- CONTACTS -->
@@ -1221,7 +1235,10 @@
 <!-- FAKTURA MODAL -->
 <div class="modal-overlay" id="fakturaModal" onclick="if(event.target===this)closeModal('fakturaModal')">
   <div class="modal-box" style="max-width:520px;max-height:92vh;overflow-y:auto;padding:28px">
-    <div class="modal-title">💰 Faktura till uthyraren</div>
+    <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>💰 Faktura till uthyraren</span>
+      <span id="fNrDisplay" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);font-weight:400"></span>
+    </div>
 
     <!-- Uthyrare info (read-only) -->
     <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:20px">
@@ -1656,6 +1673,53 @@ function renderDashboard() {
           <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openLogCallForId('${c.id}')">📞 Call</button></td>
         </tr>`).join('')}
     </tbody></table>`;
+  }
+
+  // Att fakturera (period passerad, ej skickad)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const attSkicka = fakturorList.filter(f => f.period_end && f.period_end < todayStr && !f.faktura_skickad)
+    .sort((a,b) => (a.period_end||'').localeCompare(b.period_end||''));
+  const affEl = document.getElementById('dashAttFakturera');
+  if (affEl) {
+    if (!attSkicka.length) {
+      affEl.innerHTML = '<div class="empty-state" style="font-family:\'DM Mono\',monospace;font-size:12px">Inga fakturor att skicka ✓</div>';
+    } else {
+      affEl.innerHTML = `<table><thead><tr style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
+        <th style="padding:6px 8px">Nr</th><th style="padding:6px 8px">Uthyrare</th><th style="padding:6px 8px">Vecka</th><th style="padding:6px 8px">Period</th><th style="padding:6px 8px;text-align:right">FF-avgift</th><th></th>
+      </tr></thead><tbody>${attSkicka.map(f=>`
+        <tr style="border-top:1px solid var(--border);cursor:pointer" onclick="showPage('affarer',document.querySelector('[onclick*=affarer]'));showAffSub('faktura',document.getElementById('affBtn-faktura'));openFakturaModal('${f.id}')">
+          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
+          <td style="padding:7px 8px;font-weight:600;font-size:13px">${f.foretag||'–'}</td>
+          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px">V${f.vecka_nr||'?'}</td>
+          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
+          <td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
+          <td style="padding:7px 8px"><span style="background:var(--orange);color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace">Skicka</span></td>
+        </tr>`).join('')}</tbody></table>`;
+    }
+  }
+
+  // Försenade (skickad >30 dagar sedan, ej betald)
+  const trettioAgo = new Date(); trettioAgo.setDate(trettioAgo.getDate()-30);
+  const trettioStr = trettioAgo.toISOString().split('T')[0];
+  const forsenade = fakturorList.filter(f => f.faktura_skickad && f.faktura_skickad < trettioStr && !f.faktura_betald)
+    .sort((a,b) => (a.faktura_skickad||'').localeCompare(b.faktura_skickad||''));
+  const forsEl = document.getElementById('dashForsenade');
+  if (forsEl) {
+    if (!forsenade.length) {
+      forsEl.innerHTML = '<div class="empty-state" style="font-family:\'DM Mono\',monospace;font-size:12px">Inga försenade ✓</div>';
+    } else {
+      forsEl.innerHTML = `<table><thead><tr style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
+        <th style="padding:6px 8px">Nr</th><th style="padding:6px 8px">Uthyrare</th><th style="padding:6px 8px">Skickad</th><th style="padding:6px 8px;text-align:right">FF-avgift</th><th style="padding:6px 8px">Dagar sen</th>
+      </tr></thead><tbody>${forsenade.map(f=>{
+        const days = Math.floor((new Date()-new Date(f.faktura_skickad))/86400000);
+        return `<tr style="border-top:1px solid var(--border);cursor:pointer" onclick="openFakturaModal('${f.id}')">
+          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
+          <td style="padding:7px 8px;font-weight:600;font-size:13px">${f.foretag||'–'}</td>
+          <td style="padding:7px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2)">${f.faktura_skickad}</td>
+          <td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
+          <td style="padding:7px 8px;text-align:center"><span style="background:var(--red);color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace">${days} dagar</span></td>
+        </tr>`;}).join('')}</tbody></table>`;
+    }
   }
 
   // Recent calls
@@ -2738,15 +2802,17 @@ function renderFakturaList() {
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
         <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Nr</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Vecka</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Period</th>
-          <th style="padding:6px 4px;text-align:right;font-weight:500">FF fakturerar uthyraren</th>
+          <th style="padding:6px 4px;text-align:right;font-weight:500">FF-avgift</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Skickad</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Betald</th>
           <th></th>
         </tr></thead>
         <tbody>${rows.map(f=>`
           <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="openFakturaModal('${f.id}')">
+            <td style="padding:7px 4px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
             <td style="padding:7px 4px;font-weight:600">V${f.vecka_nr||'?'}</td>
             <td style="padding:7px 4px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
             <td style="padding:7px 4px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
@@ -3095,9 +3161,11 @@ async function generateWeeklyFakturor() {
       period_end: w.pe,
       belopp,
       belopp_uthyrare: avgift + moms,
+      faktura_nr: nextFakturaNr(),
       created_at: Date.now()
     };
-    try { await sbSaveFaktura(row); fakturorList.unshift(row); generated.push(row); } catch {}
+    fakturorList.unshift(row); // add first so nextFakturaNr() sees it
+    try { await sbSaveFaktura(row); generated.push(row); } catch { fakturorList.shift(); }
   }
   closeModal('avtalModal');
   renderFakturaList();
@@ -3151,10 +3219,20 @@ function openFakturaModal(id, avtalId, foretag) {
   document.getElementById('fVeckaDisplay').textContent = f?.vecka_nr ? 'Vecka ' + f.vecka_nr : '–';
   document.getElementById('fPeriodDisplay').textContent = (f?.period_start && f?.period_end) ? f.period_start + ' → ' + f.period_end : '–';
 
+  // Faktura nr
+  document.getElementById('fNrDisplay').textContent = f?.faktura_nr ? 'FF-' + f.faktura_nr : '';
+
   document.getElementById('fakturaModal').classList.add('open');
 }
+function nextFakturaNr() {
+  const max = fakturorList.reduce((m,f) => Math.max(m, f.faktura_nr||0), 199);
+  return max + 1;
+}
+
 async function saveFaktura() {
+  const isNew = !document.getElementById('fEditId').value;
   const id = document.getElementById('fEditId').value || genId();
+  const existing = fakturorList.find(x=>x.id===id);
   const row = {
     id, foretag: document.getElementById('fForetag').value.trim(),
     avtal_id: document.getElementById('fAvtalId').value||null,
@@ -3164,7 +3242,8 @@ async function saveFaktura() {
     period_end: document.getElementById('fPeriodEnd').value||null,
     faktura_skickad: document.getElementById('fSkickad').value||null,
     faktura_betald: document.getElementById('fBetald').value||null,
-    created_at: Date.now()
+    faktura_nr: existing?.faktura_nr || nextFakturaNr(),
+    created_at: existing?.created_at || Date.now()
   };
   try {
     await sbSaveFaktura(row);
@@ -3290,7 +3369,8 @@ alter table avtal add column if not exists arbetstid text;
 alter table avtal add column if not exists timmar_totalt numeric;
 alter table avtal add column if not exists timpris numeric;
 alter table avtal add column if not exists ff_avgift_procent numeric default 8.5;
-alter table fakturor add column if not exists belopp_uthyrare numeric;`;
+alter table fakturor add column if not exists belopp_uthyrare numeric;
+alter table fakturor add column if not exists faktura_nr integer;`;
   navigator.clipboard.writeText(sql).then(() => showToast('✓ SQL kopierad!'));
 }
 </script>
