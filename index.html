@@ -2951,7 +2951,7 @@ function calcAvtalPris() {
     document.getElementById('calcUppdrags').textContent = Math.round(uppdrags).toLocaleString('sv-SE') + ' kr';
     document.getElementById('calcAvgift').textContent = avgift.toLocaleString('sv-SE') + ' kr exkl. moms (' + ffPct + '%' + (avgiftRaw < 995 ? ', minimiavgift' : '') + ')';
     document.getElementById('calcMoms').textContent = moms.toLocaleString('sv-SE') + ' kr';
-    document.getElementById('calcFaktInh').textContent = Math.round(uppdrags).toLocaleString('sv-SE') + ' kr';
+    // calcFaktInh removed
     document.getElementById('calcFaktUth').textContent = (avgift + moms).toLocaleString('sv-SE') + ' kr inkl. moms';
     document.getElementById('calcKvar').textContent = Math.round(uppdrags - avgift).toLocaleString('sv-SE') + ' kr';
     calc.style.display = '';
