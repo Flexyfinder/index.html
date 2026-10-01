@@ -1217,8 +1217,7 @@
       <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">FlexyFinder-avgift</span><span id="calcAvgift">–</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">Moms 25% på avgift</span><span id="calcMoms">–</span></div>
       <div style="height:1px;background:var(--border);margin:4px 0"></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--accent);font-weight:600">Fakturera inhyraren exkl. moms</span><span id="calcFaktInh" style="font-weight:700;color:var(--accent)">–</span></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--orange);font-weight:600">Fakturera uthyraren (avgift inkl. moms)</span><span id="calcFaktUth" style="font-weight:700;color:var(--orange)">–</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--orange);font-weight:600">FF-avgift inkl. moms (fakturera uthyraren)</span><span id="calcFaktUth" style="font-weight:700;color:var(--orange)">–</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--muted2)">Kvar till uthyraren exkl. moms</span><span id="calcKvar">–</span></div>
     </div>
 
@@ -2758,13 +2757,9 @@ function renderAvtalCards() {
         ${timmar?' · '+timmar+' timmar':''}
         ${a.arbetsplats?' · '+a.arbetsplats:''}
       </div>`:''}
-      ${uppdrags>0?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
-        <div style="padding:10px;background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
-          <div style="color:var(--muted);font-size:10px;margin-bottom:2px">Fakturera inhyraren</div>
-          <div style="font-weight:700;color:var(--accent);font-size:13px">${Math.round(uppdrags).toLocaleString('sv-SE')} kr</div>
-        </div>
+      ${uppdrags>0?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div style="padding:10px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
-          <div style="color:var(--muted);font-size:10px;margin-bottom:2px">Fakturera uthyraren (FF-avgift)</div>
+          <div style="color:var(--muted);font-size:10px;margin-bottom:2px">FF-avgift inkl. moms</div>
           <div style="font-weight:700;color:var(--orange);font-size:13px">${Math.round(avgift+moms).toLocaleString('sv-SE')} kr</div>
         </div>
         <div style="padding:10px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
