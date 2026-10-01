@@ -1253,20 +1253,37 @@
     </div>
 
     <!-- Belopp highlight -->
-    <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.3);border-radius:10px;padding:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);letter-spacing:.08em">FF-AVGIFT ATT FAKTURERA (INKL. MOMS)</div>
-        <div id="fBeloppDisplay" style="font-size:22px;font-weight:800;color:var(--orange);margin-top:4px">–</div>
+    <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.3);border-radius:10px;padding:16px;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);letter-spacing:.08em">FF-AVGIFT ATT FAKTURERA</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-align:right">
+          <div id="fVeckaDisplay" style="font-size:15px;font-weight:700;color:var(--text)">–</div>
+          <div id="fPeriodDisplay">–</div>
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-align:right">
-        <div id="fVeckaDisplay" style="font-size:15px;font-weight:700;color:var(--text)">–</div>
-        <div id="fPeriodDisplay">–</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted2)">
+          <span>Belopp exkl. moms</span>
+          <span id="fBeloppExkl" style="font-family:'DM Mono',monospace">–</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted2)">
+          <span>Moms 25%</span>
+          <span id="fBeloppMoms" style="font-family:'DM Mono',monospace">–</span>
+        </div>
+        <div style="height:1px;background:rgba(249,115,22,0.25);margin:6px 0"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:600;color:var(--orange)">Totalt inkl. moms</span>
+          <span id="fBeloppDisplay" style="font-size:22px;font-weight:800;color:var(--orange)">–</span>
+        </div>
       </div>
     </div>
 
     <!-- Status (editable) -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="form-group"><label class="form-label">Faktura skickad</label><input class="form-input" id="fSkickad" type="date"></div>
+      <div class="form-group"><label class="form-label">Fortnox nr</label><input class="form-input" id="fFortnoxNr" type="text" placeholder="ex. 1042"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group"><label class="form-label">Betald</label><input class="form-input" id="fBetald" type="date"></div>
     </div>
 
@@ -2774,8 +2791,8 @@ function renderFakturaList() {
   const betalt = fakturorList.filter(f=>f.faktura_betald).reduce((s,f) => s+(parseFloat(f.belopp_uthyrare)||0), 0);
   const ej_skickat = fakturorList.filter(f=>!f.faktura_skickad).length;
   kpiEl.innerHTML = [
-    ['FF-avgift totalt', totalt.toLocaleString('sv-SE') + ' kr', 'var(--orange)'],
-    ['Betalt av uthyrare', betalt.toLocaleString('sv-SE') + ' kr', 'var(--green)'],
+    ['FF-avgift exkl. moms', Math.round(totalt).toLocaleString('sv-SE') + ' kr', 'var(--orange)'],
+    ['Betalt av uthyrare', Math.round(betalt).toLocaleString('sv-SE') + ' kr', 'var(--green)'],
     ['Ej skickade', ej_skickat + ' st', ej_skickat>0 ? 'var(--orange)' : 'var(--muted)'],
   ].map(([label,val,col]) => `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px">
     <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:4px">${label}</div>
@@ -2802,11 +2819,12 @@ function renderFakturaList() {
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
         <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
-          <th style="padding:6px 4px;text-align:left;font-weight:500">Nr</th>
+          <th style="padding:6px 4px;text-align:left;font-weight:500">FF-nr</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Vecka</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Period</th>
-          <th style="padding:6px 4px;text-align:right;font-weight:500">FF-avgift</th>
+          <th style="padding:6px 4px;text-align:right;font-weight:500">FF-avgift exkl. moms</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Skickad</th>
+          <th style="padding:6px 4px;text-align:left;font-weight:500">Fortnox nr</th>
           <th style="padding:6px 4px;text-align:left;font-weight:500">Betald</th>
           <th></th>
         </tr></thead>
@@ -2815,10 +2833,11 @@ function renderFakturaList() {
             <td style="padding:7px 4px;color:var(--muted2)">FF-${f.faktura_nr||'?'}</td>
             <td style="padding:7px 4px;font-weight:600">V${f.vecka_nr||'?'}</td>
             <td style="padding:7px 4px;color:var(--muted2)">${f.period_start||'–'} → ${f.period_end||'–'}</td>
-            <td style="padding:7px 4px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?parseFloat(f.belopp_uthyrare).toLocaleString('sv-SE')+' kr':'–'}</td>
+            <td style="padding:7px 4px;text-align:right;font-weight:700;color:var(--orange)">${f.belopp_uthyrare?Math.round(parseFloat(f.belopp_uthyrare)).toLocaleString('sv-SE')+' kr':'–'}</td>
             <td style="padding:7px 4px">${f.faktura_skickad?`<span style="color:var(--accent)">✓ ${f.faktura_skickad}</span>`:'<span style="color:var(--muted)">–</span>'}</td>
+            <td style="padding:7px 4px;color:var(--muted2)">${f.fortnox_nr||'–'}</td>
             <td style="padding:7px 4px">${f.faktura_betald?`<span style="color:var(--green)">✓ ${f.faktura_betald}</span>`:'<span style="color:var(--muted)">–</span>'}</td>
-            <td style="padding:7px 4px;text-align:right"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();doDeleteFaktura('${f.id}')" style="color:var(--red);font-size:10px;padding:2px 6px">✕</button></td>
+            <td style="padding:7px 4px;text-align:right">${!f.faktura_skickad?`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();doDeleteFaktura('${f.id}')" style="color:var(--red);font-size:10px;padding:2px 6px">✕</button>`:''}</td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -2928,18 +2947,20 @@ async function doDeleteKontroll(id) {
 // ─── AFFÄRER: AVTAL MODAL ───────────────────────────────
 function calcAvtalPris() {
   const timmar = parseFloat(document.getElementById('aTimmarTot').value) || 0;
+  const persons = parseInt(document.getElementById('aAntalPers').value) || 1;
   const timpris = parseFloat(document.getElementById('aTimpris').value) || 0;
   const ffPct = parseFloat(document.getElementById('aFfProcent').value) || 8.5;
   const calc = document.getElementById('avtalPrisCalc');
   if (timmar > 0 && timpris > 0) {
-    const uppdrags = timmar * timpris;
-    const avgift = uppdrags * (ffPct / 100);
-    const moms = avgift * 0.25;
+    const uppdrags = persons * timmar * timpris;
+    const avgiftRaw = uppdrags * (ffPct / 100);
+    const avgift = Math.max(Math.round(avgiftRaw), 995); // minimum 995 kr exkl. moms
+    const moms = Math.round(avgift * 0.25);
     document.getElementById('calcUppdrags').textContent = Math.round(uppdrags).toLocaleString('sv-SE') + ' kr';
-    document.getElementById('calcAvgift').textContent = Math.round(avgift).toLocaleString('sv-SE') + ' kr (' + ffPct + '%)';
-    document.getElementById('calcMoms').textContent = Math.round(moms).toLocaleString('sv-SE') + ' kr';
+    document.getElementById('calcAvgift').textContent = avgift.toLocaleString('sv-SE') + ' kr exkl. moms (' + ffPct + '%' + (avgiftRaw < 995 ? ', minimiavgift' : '') + ')';
+    document.getElementById('calcMoms').textContent = moms.toLocaleString('sv-SE') + ' kr';
     document.getElementById('calcFaktInh').textContent = Math.round(uppdrags).toLocaleString('sv-SE') + ' kr';
-    document.getElementById('calcFaktUth').textContent = Math.round(avgift + moms).toLocaleString('sv-SE') + ' kr';
+    document.getElementById('calcFaktUth').textContent = (avgift + moms).toLocaleString('sv-SE') + ' kr inkl. moms';
     document.getElementById('calcKvar').textContent = Math.round(uppdrags - avgift).toLocaleString('sv-SE') + ' kr';
     calc.style.display = '';
   } else {
@@ -3145,13 +3166,26 @@ async function generateWeeklyFakturor() {
     d.setDate(d.getDate()+1);
   }
   const totalDays = Object.values(weeks).reduce((s,w)=>s+w.days, 0);
-  const hoursPerDay = totalDays > 0 ? (parseFloat(a.timmar_totalt)||0) / totalDays : 0;
+  const persons = parseInt(a.antal_personer) || 1;
+  const totHours = parseFloat(a.timmar_totalt) || 0;
+  const timpris = parseFloat(a.timpris) || 0;
+  const uppdragsvarde = persons * timpris * totHours;
+  const avgiftRaw = uppdragsvarde * (ffPct / 100);
+  const totalAvgiftExkl = Math.max(Math.round(avgiftRaw), 995); // min 995 kr/uppdrag, exkl. moms
+
+  // Sortera veckor kronologiskt
+  const weekArr = Object.values(weeks).sort((a,b)=>a.ps.localeCompare(b.ps));
+  let distributed = 0;
+  weekArr.forEach((w, i) => {
+    const isLast = i === weekArr.length - 1;
+    w.avgiftExkl = isLast
+      ? totalAvgiftExkl - distributed
+      : Math.floor(totalAvgiftExkl * w.days / totalDays);
+    if (!isLast) distributed += w.avgiftExkl;
+  });
+
   const generated = [];
-  for (const w of Object.values(weeks)) {
-    const hours = hoursPerDay * w.days;
-    const belopp = Math.round(hours * parseFloat(a.timpris));
-    const avgift = Math.round(belopp * (ffPct/100));
-    const moms = Math.round(avgift * 0.25);
+  for (const w of weekArr) {
     const row = {
       id: genId(),
       avtal_id: a.id,
@@ -3159,8 +3193,7 @@ async function generateWeeklyFakturor() {
       vecka_nr: w.vecka_nr,
       period_start: w.ps,
       period_end: w.pe,
-      belopp,
-      belopp_uthyrare: avgift + moms,
+      belopp_uthyrare: w.avgiftExkl, // exkl. moms — moms räknas i display
       faktura_nr: nextFakturaNr(),
       created_at: Date.now()
     };
@@ -3188,9 +3221,10 @@ function openFakturaModal(id, avtalId, foretag) {
   document.getElementById('fPeriodEnd').value   = f?.period_end||'';
   document.getElementById('fSkickad').value     = f?.faktura_skickad||'';
   document.getElementById('fBetald').value      = f?.faktura_betald||'';
+  document.getElementById('fFortnoxNr').value   = f?.fortnox_nr||'';
   document.getElementById('fEditId').value      = f?.id||'';
   document.getElementById('fAvtalId').value     = aId||'';
-  document.getElementById('fDeleteBtn').style.display = f ? '' : 'none';
+  document.getElementById('fDeleteBtn').style.display = (f && !f.faktura_skickad) ? '' : 'none';
 
   // Uthyrare info block
   const uth = a ? [
@@ -3213,9 +3247,19 @@ function openFakturaModal(id, avtalId, foretag) {
   ].filter(Boolean).join('<br>') : '–';
   document.getElementById('fUppdragInfo').innerHTML = uppdrag;
 
-  // Belopp / vecka display
-  const bel = parseFloat(f?.belopp_uthyrare)||0;
-  document.getElementById('fBeloppDisplay').textContent = bel ? bel.toLocaleString('sv-SE') + ' kr' : '–';
+  // Belopp / vecka display — belopp_uthyrare lagras exkl. moms
+  const exkl = Math.round(parseFloat(f?.belopp_uthyrare)||0);
+  if (exkl) {
+    const moms = Math.round(exkl * 0.25);
+    const inkl = exkl + moms;
+    document.getElementById('fBeloppExkl').textContent = exkl.toLocaleString('sv-SE') + ' kr';
+    document.getElementById('fBeloppMoms').textContent = moms.toLocaleString('sv-SE') + ' kr';
+    document.getElementById('fBeloppDisplay').textContent = inkl.toLocaleString('sv-SE') + ' kr';
+  } else {
+    document.getElementById('fBeloppExkl').textContent = '–';
+    document.getElementById('fBeloppMoms').textContent = '–';
+    document.getElementById('fBeloppDisplay').textContent = '–';
+  }
   document.getElementById('fVeckaDisplay').textContent = f?.vecka_nr ? 'Vecka ' + f.vecka_nr : '–';
   document.getElementById('fPeriodDisplay').textContent = (f?.period_start && f?.period_end) ? f.period_start + ' → ' + f.period_end : '–';
 
@@ -3242,6 +3286,8 @@ async function saveFaktura() {
     period_end: document.getElementById('fPeriodEnd').value||null,
     faktura_skickad: document.getElementById('fSkickad').value||null,
     faktura_betald: document.getElementById('fBetald').value||null,
+    fortnox_nr: document.getElementById('fFortnoxNr').value.trim()||null,
+    belopp_uthyrare: existing?.belopp_uthyrare||null,
     faktura_nr: existing?.faktura_nr || nextFakturaNr(),
     created_at: existing?.created_at || Date.now()
   };
@@ -3370,7 +3416,8 @@ alter table avtal add column if not exists timmar_totalt numeric;
 alter table avtal add column if not exists timpris numeric;
 alter table avtal add column if not exists ff_avgift_procent numeric default 8.5;
 alter table fakturor add column if not exists belopp_uthyrare numeric;
-alter table fakturor add column if not exists faktura_nr integer;`;
+alter table fakturor add column if not exists faktura_nr integer;
+alter table fakturor add column if not exists fortnox_nr text;`;
   navigator.clipboard.writeText(sql).then(() => showToast('✓ SQL kopierad!'));
 }
 </script>
