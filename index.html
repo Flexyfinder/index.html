@@ -118,16 +118,17 @@
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
     background: var(--surface);
   }
 
   .topbar-title {
     font-size: 18px;
     font-weight: 700;
+    white-space: nowrap;
   }
 
-  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; margin-left: auto; }
 
   .btn {
     padding: 8px 16px;
@@ -673,9 +674,11 @@
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" id="pageTitle">Översikt</div>
-    <div class="topbar-actions" id="topbarActions">
+    <div id="topbarBtn" style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>
       <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>
+    </div>
+    <div class="topbar-actions" id="topbarActions">
       <input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">
     </div>
   </div>
@@ -1695,17 +1698,20 @@ function showPage(id, el) {
 }
 
 function updateTopbar(id) {
+  const btn = document.getElementById('topbarBtn');
   const actions = document.getElementById('topbarActions');
-  if (!actions) return;
+  if (!btn || !actions) return;
   if (id === 'kundregister') {
-    actions.innerHTML = `
-      <button class="btn btn-primary" onclick="openKundkortModal(null)">+ Lägg till kund</button>
-      <input class="search-box" type="text" placeholder="Sök kunder..." id="globalSearch" oninput="handleSearch(this.value)">`;
-  } else {
-    actions.innerHTML = `
+    btn.innerHTML = `<button class="btn btn-primary" onclick="openKundkortModal(null)">+ Lägg till kund</button>`;
+    actions.innerHTML = `<input class="search-box" type="text" placeholder="Sök kunder..." id="globalSearch" oninput="handleSearch(this.value)">`;
+  } else if (id === 'contacts') {
+    btn.innerHTML = `
       <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>
-      <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>
-      <input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">`;
+      <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>`;
+    actions.innerHTML = `<input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">`;
+  } else {
+    btn.innerHTML = '';
+    actions.innerHTML = `<input class="search-box" type="text" placeholder="Sök..." id="globalSearch" oninput="handleSearch(this.value)">`;
   }
 }
 
