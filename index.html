@@ -856,25 +856,21 @@
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Fakturaadress</label>
-        <input class="form-input" id="fFakturaAdress" placeholder="Storgatan 1, 123 45 Stockholm">
+        <input class="form-input" id="fFakturaAdress" placeholder="Storgatan 1">
       </div>
       <div class="form-group">
-        <label class="form-label">Bransch</label>
-        <input class="form-input" id="fIndustry" placeholder="Bygg, El, VVS...">
+        <label class="form-label">Postnummer</label>
+        <input class="form-input" id="fPostnr" placeholder="123 45">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Status</label>
-        <select class="form-select" id="fStatus">
-          <option value="not called">Ej kontaktad</option>
-          <option value="called">Kontaktad</option>
-          <option value="not answered">Svarade ej</option>
-          <option value="interested">Intresserad</option>
-          <option value="follow-up">Uppföljning</option>
-          <option value="not interested">Ej intresserad</option>
-          <option value="closed">Avslutad</option>
-        </select>
+        <label class="form-label">Ort</label>
+        <input class="form-input" id="fOrt" placeholder="Stockholm">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bransch</label>
+        <input class="form-input" id="fIndustry" placeholder="Bygg, El, VVS...">
       </div>
     </div>
     <div class="form-group">
@@ -2010,7 +2006,8 @@ function openAddContact() {
   document.getElementById('fEmail').value = '';
   document.getElementById('fFakturaEpost').value = '';
   document.getElementById('fFakturaAdress').value = '';
-  document.getElementById('fStatus').value = 'not called';
+  document.getElementById('fPostnr').value = '';
+  document.getElementById('fOrt').value = '';
   document.getElementById('fIndustry').value = '';
   document.getElementById('fNotes').value = '';
   document.getElementById('fEditId').value = '';
@@ -2029,7 +2026,8 @@ function openEditContact(id) {
   document.getElementById('fEmail').value = c.email || '';
   document.getElementById('fFakturaEpost').value = c.faktura_epost || '';
   document.getElementById('fFakturaAdress').value = c.faktura_adress || '';
-  document.getElementById('fStatus').value = c.status || 'not called';
+  document.getElementById('fPostnr').value = c.postnr || '';
+  document.getElementById('fOrt').value = c.ort || '';
   document.getElementById('fIndustry').value = c.industry || '';
   document.getElementById('fNotes').value = c.notes || '';
   document.getElementById('fEditId').value = id;
@@ -2049,7 +2047,8 @@ function saveContact() {
     email: document.getElementById('fEmail').value.trim(),
     faktura_epost: document.getElementById('fFakturaEpost').value.trim(),
     faktura_adress: document.getElementById('fFakturaAdress').value.trim(),
-    status: document.getElementById('fStatus').value,
+    postnr: document.getElementById('fPostnr').value.trim(),
+    ort: document.getElementById('fOrt').value.trim(),
     industry: document.getElementById('fIndustry').value.trim(),
     notes: document.getElementById('fNotes').value.trim(),
   };
@@ -2969,6 +2968,9 @@ function renderKundregister() {
     const kundnr = match?.kundnr || '';
     const faktEpost = match?.faktura_epost || '';
     const faktAdress = match?.faktura_adress || '';
+    const faktPostnr = match?.postnr || '';
+    const faktOrt = match?.ort || '';
+    const faktAdressFull = [faktAdress, [faktPostnr, faktOrt].filter(Boolean).join(' ')].filter(Boolean).join(', ');
     return `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start">
       <div>
@@ -2985,7 +2987,7 @@ function renderKundregister() {
           ${k.epost?`✉ <a href="mailto:${k.epost}" style="color:var(--accent)">${k.epost}</a><br>`:''}
           ${faktEpost?`📧 Faktura: <a href="mailto:${faktEpost}" style="color:var(--accent)">${faktEpost}</a><br>`:''}
           ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a><br>`:''}
-          ${faktAdress?`🏠 ${faktAdress}`:''}
+          ${faktAdressFull?`🏠 ${faktAdressFull}`:''}
         </div>
       </div>
       <div style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
