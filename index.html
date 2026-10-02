@@ -640,7 +640,7 @@
   </div>
   <div class="nav-item" onclick="showPage('followups', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    Follow-ups
+    Uppföljningar
   </div>
   <div class="nav-item" onclick="showPage('social', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
@@ -657,7 +657,7 @@
 
   <div class="sidebar-bottom">
     <div class="stats-mini" id="sidebarStats">Loading...</div>
-    <div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px" id="syncStatus">○ not connected</div>
+    <div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px" id="syncStatus">○ ej ansluten</div>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;font-size:10px" onclick="disconnectSheets()">⚙ Change connection</button>
   </div>
 </nav>
@@ -667,9 +667,9 @@
   <div class="topbar">
     <div class="topbar-title" id="pageTitle">Dashboard</div>
     <div class="topbar-actions">
-      <input class="search-box" type="text" placeholder="Search contacts..." id="globalSearch" oninput="handleSearch(this.value)">
-      <button class="btn btn-ghost" onclick="openImportModal()">⬆ Import CSV</button>
-      <button class="btn btn-primary" onclick="openAddContact()">+ Add Contact</button>
+      <input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">
+      <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>
+      <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>
     </div>
   </div>
 
@@ -732,28 +732,28 @@
     <!-- CONTACTS -->
     <div class="page" id="page-contacts">
       <div class="filter-row" id="contactFilters">
-        <button class="filter-btn active" onclick="filterContacts('all', this)">All</button>
-        <button class="filter-btn" onclick="filterContacts('follow-up', this)">Follow-up</button>
-        <button class="filter-btn" onclick="filterContacts('interested', this)">Interested</button>
-        <button class="filter-btn" onclick="filterContacts('called', this)">Called</button>
-        <button class="filter-btn" onclick="filterContacts('not answered', this)">No Answer</button>
-        <button class="filter-btn" onclick="filterContacts('not interested', this)">Not Interested</button>
-        <button class="filter-btn" onclick="filterContacts('closed', this)">Closed</button>
+        <button class="filter-btn active" onclick="filterContacts('all', this)">Alla</button>
+        <button class="filter-btn" onclick="filterContacts('follow-up', this)">Uppföljning</button>
+        <button class="filter-btn" onclick="filterContacts('interested', this)">Intresserad</button>
+        <button class="filter-btn" onclick="filterContacts('called', this)">Kontaktad</button>
+        <button class="filter-btn" onclick="filterContacts('not answered', this)">Svarade ej</button>
+        <button class="filter-btn" onclick="filterContacts('not interested', this)">Ej intresserad</button>
+        <button class="filter-btn" onclick="filterContacts('closed', this)">Avslutad</button>
       </div>
       <div class="table-wrap">
         <table id="contactsTable">
           <thead>
             <tr>
-              <th>Company / Contact</th>
-              <th>Phone</th>
+              <th>Företag / Kontakt</th>
+              <th>Telefon</th>
               <th>Status</th>
-              <th>Last Called</th>
-              <th>Follow-up</th>
+              <th>Senast ringd</th>
+              <th>Uppföljning</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="contactsBody">
-            <tr><td colspan="6"><div class="empty-state">No contacts yet. Add your first one!</div></td></tr>
+            <tr><td colspan="6"><div class="empty-state">Inga kontakter ännu. Lägg till din första!</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -762,22 +762,22 @@
     <!-- CALLS -->
     <div class="page" id="page-calls">
       <div class="section-header">
-        <div class="section-title">All Call Logs</div>
-        <button class="btn btn-ghost btn-sm" onclick="openLogCall(null)">+ Log Call</button>
+        <div class="section-title">Alla samtal</div>
+        <button class="btn btn-ghost btn-sm" onclick="openLogCall(null)">+ Logga samtal</button>
       </div>
       <div class="table-wrap">
         <table id="callsTable">
           <thead>
             <tr>
-              <th>Date & Time</th>
-              <th>Company / Contact</th>
-              <th>Outcome</th>
-              <th>Notes</th>
-              <th>Follow-up Set</th>
+              <th>Datum & tid</th>
+              <th>Företag / Kontakt</th>
+              <th>Utfall</th>
+              <th>Anteckningar</th>
+              <th>Uppföljning inbokad</th>
             </tr>
           </thead>
           <tbody id="callsBody">
-            <tr><td colspan="5"><div class="empty-state">No calls logged yet</div></td></tr>
+            <tr><td colspan="5"><div class="empty-state">Inga samtal loggade ännu</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -786,24 +786,24 @@
     <!-- FOLLOWUPS -->
     <div class="page" id="page-followups">
       <div class="filter-row">
-        <button class="filter-btn active" onclick="filterFollowups('all', this)">All</button>
-        <button class="filter-btn" onclick="filterFollowups('overdue', this)">Overdue</button>
-        <button class="filter-btn" onclick="filterFollowups('today', this)">Today</button>
-        <button class="filter-btn" onclick="filterFollowups('upcoming', this)">Upcoming</button>
+        <button class="filter-btn active" onclick="filterFollowups('all', this)">Alla</button>
+        <button class="filter-btn" onclick="filterFollowups('overdue', this)">Försenade</button>
+        <button class="filter-btn" onclick="filterFollowups('today', this)">Idag</button>
+        <button class="filter-btn" onclick="filterFollowups('upcoming', this)">Kommande</button>
       </div>
       <div class="table-wrap">
         <table id="followupsTable">
           <thead>
             <tr>
-              <th>Company / Contact</th>
-              <th>Follow-up Date</th>
-              <th>Last Note</th>
+              <th>Företag / Kontakt</th>
+              <th>Uppföljningsdatum</th>
+              <th>Senaste notering</th>
               <th>Status</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="followupsBody">
-            <tr><td colspan="5"><div class="empty-state">No follow-ups scheduled</div></td></tr>
+            <tr><td colspan="5"><div class="empty-state">Inga uppföljningar inbokade</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -816,7 +816,7 @@
 <div class="modal-overlay" id="contactModal">
   <div class="modal">
     <div class="modal-title">
-      <span id="contactModalTitle">Add Contact</span>
+      <span id="contactModalTitle">Lägg till kontakt</span>
       <button class="close-btn" onclick="closeModal('contactModal')">×</button>
     </div>
     <div class="form-row">
@@ -907,27 +907,27 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Outcome</label>
+      <label class="form-label">Utfall</label>
       <select class="form-select" id="cOutcome">
-        <option value="called">Reached — Talked</option>
-        <option value="not answered">No Answer</option>
-        <option value="interested">Interested / Hot Lead</option>
-        <option value="follow-up">Set Follow-up</option>
-        <option value="not interested">Not Interested</option>
-        <option value="closed">Deal Closed</option>
+        <option value="called">Nådde fram — Pratade</option>
+        <option value="not answered">Svarade ej</option>
+        <option value="interested">Intresserad / Varm lead</option>
+        <option value="follow-up">Bokade uppföljning</option>
+        <option value="not interested">Ej intresserad</option>
+        <option value="closed">Affär klar</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Notes from the call</label>
-      <textarea class="form-textarea" id="cNotes" placeholder="What was discussed, who you spoke to, key info..."></textarea>
+      <label class="form-label">Anteckningar från samtalet</label>
+      <textarea class="form-textarea" id="cNotes" placeholder="Vad diskuterades, vem du pratade med, viktig info..."></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label">Schedule Follow-up</label>
-      <input class="form-input" type="date" id="cFollowup" placeholder="Optional">
+      <label class="form-label">Boka uppföljning</label>
+      <input class="form-input" type="date" id="cFollowup" placeholder="Valfritt">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('callModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveCall()">Save Call</button>
+      <button class="btn btn-ghost" onclick="closeModal('callModal')">Avbryt</button>
+      <button class="btn btn-primary" onclick="saveCall()">Spara samtal</button>
     </div>
   </div>
 </div>
@@ -936,20 +936,20 @@
 <div class="modal-overlay" id="importModal">
   <div class="modal" style="width:580px">
     <div class="modal-title">
-      <span>Import Contacts from CSV</span>
+      <span>Importera kontakter från CSV</span>
       <button class="close-btn" onclick="closeModal('importModal')">×</button>
     </div>
 
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:18px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);line-height:2">
-      <div style="color:var(--accent);margin-bottom:4px;font-size:10px;letter-spacing:1px;text-transform:uppercase">Expected columns (any order, headers required):</div>
+      <div style="color:var(--accent);margin-bottom:4px;font-size:10px;letter-spacing:1px;text-transform:uppercase">Förväntade kolumner (valfri ordning, rubriker krävs):</div>
       company, name, phone, email, status, industry, notes<br>
-      <span style="color:var(--muted);font-size:10px">Status values: not called · called · interested · follow-up · not answered · not interested · closed</span>
+      <span style="color:var(--muted);font-size:10px">Statusvärden: not called · called · interested · follow-up · not answered · not interested · closed</span>
     </div>
 
     <div id="importDropzone" style="border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px" onclick="document.getElementById('csvFileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       <div style="font-size:28px;margin-bottom:8px">📂</div>
-      <div style="font-weight:700;margin-bottom:4px">Drop CSV file here or click to browse</div>
-      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">Supports .csv files</div>
+      <div style="font-weight:700;margin-bottom:4px">Släpp CSV-fil här eller klicka för att bläddra</div>
+      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">Stöder .csv-filer</div>
       <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleFileSelect(this)">
     </div>
 
@@ -965,13 +965,13 @@
       </div>
       <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted2)">
         <input type="checkbox" id="importSkipDupes" checked style="accent-color:var(--accent)">
-        <label for="importSkipDupes">Skip duplicates (same company name)</label>
+        <label for="importSkipDupes">Hoppa över dubbletter (samma företagsnamn)</label>
       </div>
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('importModal');resetImport()">Cancel</button>
-      <button class="btn btn-primary" id="importConfirmBtn" style="display:none" onclick="confirmImport()">Import Contacts</button>
+      <button class="btn btn-ghost" onclick="closeModal('importModal');resetImport()">Avbryt</button>
+      <button class="btn btn-primary" id="importConfirmBtn" style="display:none" onclick="confirmImport()">Importera kontakter</button>
     </div>
   </div>
 </div>
@@ -1410,7 +1410,7 @@
   <div class="detail-section">
     <div class="detail-section-title">Actions</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-ghost btn-sm" onclick="openLogCallForContact()">📞 Log Call</button>
+      <button class="btn btn-ghost btn-sm" onclick="openLogCallForContact()">📞 Logga samtal</button>
       <button class="btn btn-ghost btn-sm" onclick="editCurrentContact()">✏️ Edit</button>
       <button class="btn btn-sm btn-danger" onclick="deleteCurrentContact()">🗑 Delete</button>
     </div>
@@ -1617,7 +1617,7 @@ function setStatus(state, msg) {
     ok:      { color: 'var(--green)',   text: '● synced' },
     syncing: { color: 'var(--accent2)', text: '↻ syncing…' },
     error:   { color: 'var(--red)',     text: '✕ ' + (msg || 'error') },
-    offline: { color: 'var(--muted)',   text: '○ not connected' },
+    offline: { color: 'var(--muted)',   text: '○ ej ansluten' },
   };
   const s = map[state] || map.offline;
   el.style.color = s.color;
@@ -1638,7 +1638,7 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   el.classList.add('active');
-  const titles = { dashboard: 'Dashboard', contacts: 'Contacts', calls: 'Call Log', followups: 'Follow-ups', social: 'Social Media', affarer: 'Affärer', kundregister: 'Kundregister' };
+  const titles = { dashboard: 'Dashboard', contacts: 'Kontakter', calls: 'Samtalslogg', followups: 'Uppföljningar', social: 'Social Media', affarer: 'Affärer', kundregister: 'Kundregister' };
   document.getElementById('pageTitle').textContent = titles[id];
   renderAll();
 }
@@ -1703,18 +1703,18 @@ function renderDashboard() {
   const due = contacts.filter(c => c.followupDate && c.followupDate <= today());
   const ftbl = document.getElementById('dashFollowupTable');
   if (due.length === 0) {
-    ftbl.innerHTML = '<div class="empty-state">No follow-ups due today — good job!</div>';
+    ftbl.innerHTML = '<div class="empty-state">Inga uppföljningar idag — bra jobbat!</div>';
   } else {
-    ftbl.innerHTML = `<table><thead><tr><th>Company / Contact</th><th>Follow-up Date</th><th>Status</th><th></th></tr></thead><tbody>
+    ftbl.innerHTML = `<table><thead><tr><th>Företag / Kontakt</th><th>Uppföljningsdatum</th><th>Status</th><th></th></tr></thead><tbody>
       ${due.map(c => `
         <tr class="${isOverdue(c.followupDate) ? 'followup-row' : ''}" onclick="openDetail('${c.id}')">
           <td class="name-cell">
             <span class="company-initial" style="background:${colorFor(c.company)}20;color:${colorFor(c.company)}">${c.company[0]}</span>
             <div><div style="font-weight:600">${c.company}</div><div style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace">${c.name || ''}</div></div>
           </td>
-          <td style="font-family:'DM Mono',monospace;font-size:12px" class="${isOverdue(c.followupDate) ? 'overdue' : ''}">${fmtDate(c.followupDate)}${isOverdue(c.followupDate) ? ' ⚠' : ''}${isToday(c.followupDate) ? '<span class="today-badge">TODAY</span>' : ''}</td>
+          <td style="font-family:'DM Mono',monospace;font-size:12px" class="${isOverdue(c.followupDate) ? 'overdue' : ''}">${fmtDate(c.followupDate)}${isOverdue(c.followupDate) ? ' ⚠' : ''}${isToday(c.followupDate) ? '<span class="today-badge">IDAG</span>' : ''}</td>
           <td>${statusBadge(c.status)}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openLogCallForId('${c.id}')">📞 Call</button></td>
+          <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openLogCallForId('${c.id}')">📞 Ring</button></td>
         </tr>`).join('')}
     </tbody></table>`;
   }
@@ -1809,7 +1809,7 @@ function renderContacts() {
 
   const tbody = document.getElementById('contactsBody');
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No contacts found</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">Inga kontakter hittades</div></td></tr>';
     return;
   }
   tbody.innerHTML = filtered.map(c => `
@@ -1825,7 +1825,7 @@ function renderContacts() {
       <td>${statusBadge(c.status)}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px">${fmtDate(c.lastCalled) || '—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px" class="${c.followupDate && isOverdue(c.followupDate) ? 'overdue' : ''}">
-        ${c.followupDate ? (fmtDate(c.followupDate) + (isOverdue(c.followupDate) ? ' ⚠' : '') + (isToday(c.followupDate) ? '<span class="today-badge">TODAY</span>' : '')) : '—'}
+        ${c.followupDate ? (fmtDate(c.followupDate) + (isOverdue(c.followupDate) ? ' ⚠' : '') + (isToday(c.followupDate) ? '<span class="today-badge">IDAG</span>' : '')) : '—'}
       </td>
       <td>
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openLogCallForId('${c.id}')">📞</button>
@@ -1839,7 +1839,7 @@ function renderCalls() {
   const sorted = [...calls].sort((a, b) => b.createdAt - a.createdAt);
   const tbody = document.getElementById('callsBody');
   if (sorted.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No calls logged yet</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Inga samtal loggade ännu</div></td></tr>';
     return;
   }
   tbody.innerHTML = sorted.map(c => {
@@ -1847,7 +1847,7 @@ function renderCalls() {
     return `<tr onclick="${contact ? `openDetail('${c.contactId}')` : ''}">
       <td style="font-family:'DM Mono',monospace;font-size:12px">${fmtDateTime(c.createdAt)}</td>
       <td>
-        <strong>${contact ? contact.company : 'Unknown'}</strong>
+        <strong>${contact ? contact.company : 'Okänd'}</strong>
         <span style="color:var(--muted2);font-size:11px;display:block;font-family:'DM Mono',monospace">${contact ? (contact.name || '') : ''}</span>
       </td>
       <td>${statusBadge(c.outcome)}</td>
@@ -1874,7 +1874,7 @@ function renderFollowups() {
 
   const tbody = document.getElementById('followupsBody');
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No follow-ups in this category</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Inga uppföljningar i den här kategorin</div></td></tr>';
     return;
   }
   tbody.innerHTML = filtered.map(c => {
@@ -1931,7 +1931,7 @@ function openDetail(id) {
     <div class="detail-row"><span class="key">Status</span><span class="val">${statusBadge(c.status)}</span></div>
     <div class="detail-row"><span class="key">Phone</span><span class="val">${c.phone || '—'}</span></div>
     <div class="detail-row"><span class="key">Email</span><span class="val">${c.email || '—'}</span></div>
-    <div class="detail-row"><span class="key">Last called</span><span class="val">${fmtDate(c.lastCalled) || '—'}</span></div>
+    <div class="detail-row"><span class="key">Senast ringd</span><span class="val">${fmtDate(c.lastCalled) || '—'}</span></div>
     <div class="detail-row"><span class="key">Follow-up</span><span class="val">${fmtDate(c.followupDate) || '—'}</span></div>
     ${c.notes ? `<div style="margin-top:10px;font-size:12px;color:var(--muted2);line-height:1.6;font-family:'DM Mono',monospace">${c.notes}</div>` : ''}
   `;
@@ -1947,7 +1947,7 @@ function openDetail(id) {
   document.getElementById('dpCallCount').textContent = contactCalls.length;
   const logEl = document.getElementById('dpCallLog');
   if (contactCalls.length === 0) {
-    logEl.innerHTML = '<div style="color:var(--muted);font-size:12px;font-family:\'DM Mono\',monospace">No calls yet</div>';
+    logEl.innerHTML = '<div style="color:var(--muted);font-size:12px;font-family:\'DM Mono\',monospace">Inga samtal ännu</div>';
   } else {
     logEl.innerHTML = contactCalls.map(cl => `
       <div class="call-log-item">
@@ -2036,7 +2036,7 @@ function openEditContact(id) {
 
 function saveContact() {
   const company = document.getElementById('fCompany').value.trim();
-  if (!company) { alert('Company name is required'); return; }
+  if (!company) { alert('Företagsnamn är obligatoriskt'); return; }
   const editId = document.getElementById('fEditId').value;
   const data = {
     company,
@@ -2960,8 +2960,16 @@ function renderKundregister() {
     addKund(a.uthyrare_foretag, a.uthyrare_org_nr, a.uthyrare_kontakt, a.uthyrare_epost, a.uthyrare_telefon, 'Uthyrare', a.id);
   });
   kontroller.forEach(k => addKund(k.foretag, k.org_nr, null, null, null, null, null));
+  // Lägg även till contacts från localStorage som inte redan finns
+  contacts.forEach(c => {
+    if (!c.company) return;
+    const key = (c.org_nr || c.company).toLowerCase();
+    if (!kunder[key]) {
+      kunder[key] = { foretag: c.company, orgNr: c.org_nr||'', kontakt: c.name||'', epost: c.email||'', telefon: c.phone||'', roller: [], avtalIds: [] };
+    }
+  });
   const list = Object.values(kunder).sort((a,b)=>a.foretag.localeCompare(b.foretag,'sv'));
-  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga kunder ännu — lägg till avtal under Affärer</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga kunder ännu — lägg till en kontakt eller ett avtal</div>'; return; }
   el.innerHTML = `<div style="display:grid;gap:12px">${list.map(k=>{
     // Korsreferera mot contacts (localStorage) för kundnummer och extra info
     const match = contacts.find(c => c.company && c.company.toLowerCase() === k.foretag.toLowerCase());
