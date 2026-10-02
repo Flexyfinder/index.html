@@ -1096,12 +1096,9 @@
 
   <!-- KONTROLL -->
   <div id="affSec-kontroll">
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-      <button class="btn btn-primary" onclick="openKontrollModal(null)">+ Ny kontroll</button>
-      <div>
-        <div style="font-size:16px;font-weight:700">Företagskontroll</div>
-        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">ID · F-skatt · Försäkring · Skulder</div>
-      </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700">Företagskontroll</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">ID · F-skatt · Försäkring · Skulder</div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto">
       <div id="kontrollList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
@@ -1110,12 +1107,9 @@
 
   <!-- AVTAL -->
   <div id="affSec-avtal" style="display:none">
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-      <button class="btn btn-primary" onclick="openAvtalModal(null)">+ Nytt avtal</button>
-      <div>
-        <div style="font-size:16px;font-weight:700">Avtal</div>
-        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Inhyrare &amp; Uthyrare — avtal efter match</div>
-      </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700">Avtal</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Inhyrare &amp; Uthyrare — avtal efter match</div>
     </div>
     <div id="faktureringsVarningar"></div>
     <div id="avtalCards"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
@@ -1709,6 +1703,17 @@ function updateTopbar(id) {
       <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>
       <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>`;
     actions.innerHTML = `<input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">`;
+  } else if (id === 'affarer') {
+    // Visa knapp för aktiv sub-flik (standard: kontroll)
+    const sub = window.affSub || 'kontroll';
+    if (sub === 'kontroll') {
+      btn.innerHTML = `<button class="btn btn-primary" onclick="openKontrollModal(null)">+ Ny kontroll</button>`;
+    } else if (sub === 'avtal') {
+      btn.innerHTML = `<button class="btn btn-primary" onclick="openAvtalModal(null)">+ Nytt avtal</button>`;
+    } else {
+      btn.innerHTML = '';
+    }
+    actions.innerHTML = `<input class="search-box" type="text" placeholder="Sök..." id="globalSearch" oninput="handleSearch(this.value)">`;
   } else {
     btn.innerHTML = '';
     actions.innerHTML = `<input class="search-box" type="text" placeholder="Sök..." id="globalSearch" oninput="handleSearch(this.value)">`;
@@ -2790,6 +2795,17 @@ function showAffSub(sub, btn) {
       b.style.borderBottom = s === sub ? '2px solid var(--accent)' : '2px solid transparent';
     }
   });
+  // Uppdatera topbar-knappen beroende på aktiv sub-flik
+  const topBtn = document.getElementById('topbarBtn');
+  if (topBtn) {
+    if (sub === 'kontroll') {
+      topBtn.innerHTML = `<button class="btn btn-primary" onclick="openKontrollModal(null)">+ Ny kontroll</button>`;
+    } else if (sub === 'avtal') {
+      topBtn.innerHTML = `<button class="btn btn-primary" onclick="openAvtalModal(null)">+ Nytt avtal</button>`;
+    } else {
+      topBtn.innerHTML = '';
+    }
+  }
 }
 
 // ─── AFFÄRER: RENDER ────────────────────────────────────
