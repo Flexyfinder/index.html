@@ -2726,8 +2726,11 @@ function renderAvtalCards() {
   }
   el.innerHTML = avtalList2.map(a => {
     const faks = fakturorList.filter(f => f.avtal_id === a.id);
-    const totalt = faks.reduce((s,f) => s + (parseFloat(f.belopp)||0), 0);
-    const betalda = faks.filter(f => f.faktura_betald).reduce((s,f) => s + (parseFloat(f.belopp)||0), 0);
+    const ffFakturerat = faks.reduce((s,f) => s + (parseFloat(f.belopp_uthyrare)||0), 0);
+    const ffBetalt = faks.filter(f => f.faktura_betald).reduce((s,f) => s + (parseFloat(f.belopp_uthyrare)||0), 0);
+    const ffSkickat = faks.filter(f => f.faktura_skickad).reduce((s,f) => s + (parseFloat(f.belopp_uthyrare)||0), 0);
+    const totalt = ffFakturerat; // alias för kompatibilitet
+    const betalda = ffBetalt;
     const ffPct = a.ff_avgift_procent || 8.5;
     const timmar = parseFloat(a.timmar_totalt) || 0;
     const timpris = parseFloat(a.timpris) || 0;
@@ -2769,21 +2772,25 @@ function renderAvtalCards() {
         ${a.arbetsplats?' · '+a.arbetsplats:''}
         ${a.faktureringsmodell?` · <span style="background:rgba(99,102,241,0.12);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:10px;letter-spacing:0.5px">${a.faktureringsmodell}</span>`:''}
       </div>`:''}
-      ${uppdrags>0?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      ${(uppdrags>0||ffFakturerat>0)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div style="padding:10px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
           <div style="color:var(--muted);font-size:10px;margin-bottom:2px">FF-avgift inkl. moms</div>
-          <div style="font-weight:700;color:var(--orange);font-size:13px">${Math.round(avgift+moms).toLocaleString('sv-SE')} kr</div>
+          ${uppdrags>0?`<div style="font-weight:700;color:var(--orange);font-size:13px">${Math.round(avgift+moms).toLocaleString('sv-SE')} kr</div>`:'<div style="color:var(--muted);font-size:11px">–</div>'}
+          ${ffFakturerat>0?`<div style="font-size:10px;margin-top:4px;color:var(--muted2)">Fakturerat: <span style="color:var(--orange);font-weight:600">${Math.round(ffFakturerat).toLocaleString('sv-SE')} kr</span></div>`:''}
+          ${ffSkickat>0?`<div style="font-size:10px;color:var(--muted2)">Skickat: <span style="color:var(--green);font-weight:600">${Math.round(ffSkickat).toLocaleString('sv-SE')} kr</span></div>`:''}
         </div>
         <div style="padding:10px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
           <div style="color:var(--muted);font-size:10px;margin-bottom:2px">Kvar till uthyraren</div>
-          <div style="font-weight:700;color:var(--green);font-size:13px">${Math.round(uppdrags-avgift).toLocaleString('sv-SE')} kr</div>
+          ${uppdrags>0?`<div style="font-weight:700;color:var(--green);font-size:13px">${Math.round(uppdrags-avgift).toLocaleString('sv-SE')} kr</div>`:'<div style="color:var(--muted);font-size:11px">–</div>'}
+          ${ffBetalt>0?`<div style="font-size:10px;margin-top:4px;color:var(--muted2)">Betalt: <span style="color:var(--green);font-weight:600">${Math.round(ffBetalt).toLocaleString('sv-SE')} kr</span></div>`:''}
         </div>
       </div>`:''}
       ${faks.length?`<div style="padding-top:8px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);display:flex;gap:14px;flex-wrap:wrap">
         <span>📋 ${faks.length} faktura${faks.length>1?'r':''}</span>
-        <span>Totalt: <strong style="color:var(--text)">${totalt.toLocaleString('sv-SE')} kr</strong></span>
-        <span>Betalt: <strong style="color:var(--green)">${betalda.toLocaleString('sv-SE')} kr</strong></span>
-        ${totalt-betalda>0?`<span>Utestående: <strong style="color:var(--orange)">${(totalt-betalda).toLocaleString('sv-SE')} kr</strong></span>`:''}
+        <span>FF-avgift: <strong style="color:var(--orange)">${Math.round(ffFakturerat).toLocaleString('sv-SE')} kr</strong></span>
+        ${ffSkickat>0?`<span>Skickat: <strong style="color:var(--green)">${Math.round(ffSkickat).toLocaleString('sv-SE')} kr</strong></span>`:''}
+        ${ffBetalt>0?`<span>Betalt: <strong style="color:var(--green)">${Math.round(ffBetalt).toLocaleString('sv-SE')} kr</strong></span>`:''}
+        ${ffFakturerat-ffBetalt>0?`<span>Utestående: <strong style="color:var(--orange)">${Math.round(ffFakturerat-ffBetalt).toLocaleString('sv-SE')} kr</strong></span>`:''}
       </div>`:''}
     </div>`;
   }).join('');
@@ -2794,10 +2801,12 @@ function renderFakturaList() {
   const listEl = document.getElementById('fakturaList');
   if (!kpiEl || !listEl) return;
   const totalt = fakturorList.reduce((s,f) => s+(parseFloat(f.belopp_uthyrare)||0), 0);
+  const skickat = fakturorList.filter(f=>f.faktura_skickad).reduce((s,f) => s+(parseFloat(f.belopp_uthyrare)||0), 0);
   const betalt = fakturorList.filter(f=>f.faktura_betald).reduce((s,f) => s+(parseFloat(f.belopp_uthyrare)||0), 0);
   const ej_skickat = fakturorList.filter(f=>!f.faktura_skickad).length;
   kpiEl.innerHTML = [
     ['FF-avgift exkl. moms', Math.round(totalt).toLocaleString('sv-SE') + ' kr', 'var(--orange)'],
+    ['Skickat', Math.round(skickat).toLocaleString('sv-SE') + ' kr', 'var(--green)'],
     ['Betalt av uthyrare', Math.round(betalt).toLocaleString('sv-SE') + ' kr', 'var(--green)'],
     ['Ej skickade', ej_skickat + ' st', ej_skickat>0 ? 'var(--orange)' : 'var(--muted)'],
   ].map(([label,val,col]) => `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px">
