@@ -607,6 +607,13 @@
 
   /* SOCIAL MEDIA */
   .li-badge { display:inline-flex;align-items:center;gap:3px;background:#0a66c2;color:#fff;border-radius:3px;padding:1px 5px;font-size:9px;font-family:'DM Mono',monospace;vertical-align:middle;font-weight:600; }
+  .ac-dropdown { position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:1000;max-height:200px;overflow-y:auto;width:100%; }
+  .ac-item { padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border); }
+  .ac-item:last-child { border-bottom:none; }
+  .ac-item:hover { background:var(--surface2); }
+  .ac-item strong { color:var(--text); }
+  .ac-item span { color:var(--muted2);font-size:11px;font-family:'DM Mono',monospace;margin-left:6px; }
+  .ac-wrap { position:relative; }
   .fb-type-in { background:rgba(37,99,235,0.12);color:var(--accent);border-radius:4px;padding:2px 8px;font-size:11px;font-family:'DM Mono',monospace;font-weight:600; }
   .fb-type-ut { background:rgba(34,197,94,0.12);color:#16a34a;border-radius:4px;padding:2px 8px;font-size:11px;font-family:'DM Mono',monospace;font-weight:600; }
   .fb-post-row { background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px; }
@@ -1162,9 +1169,53 @@
 <!-- KUNDREGISTER PAGE -->
 <div class="page" id="page-kundregister">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Företag från avtal och företagskontroll</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Kundregister — källdata för avtal och matchningar</div>
+    <button class="btn btn-primary" onclick="openKundkortModal(null)">+ Lägg till kund</button>
   </div>
-  <div id="kundregisterList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga kunder ännu</div></div>
+  <div id="kundregisterList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga kunder ännu — klicka "+ Lägg till kund" för att börja</div></div>
+</div>
+
+<!-- KUNDKORT MODAL -->
+<div class="modal-overlay" id="kundkortModal" onclick="if(event.target===this)closeModal('kundkortModal')">
+  <div class="modal-box" style="max-width:580px;max-height:92vh;overflow-y:auto;padding:28px">
+    <div class="modal-title">🏢 Kundkort</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Företagsnamn *</label><input class="form-input" id="kkForetag" placeholder="Byggbolaget AB"></div>
+      <div class="form-group"><label class="form-label">Org.nr</label><input class="form-input" id="kkOrgNr" placeholder="556xxx-xxxx"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Kundnummer</label><input class="form-input" id="kkKundnr" placeholder="K001"></div>
+      <div class="form-group"><label class="form-label">Roll</label>
+        <select class="form-input" id="kkRoll">
+          <option value="">— välj roll —</option>
+          <option value="Inhyrare">Inhyrare (hyr in personal)</option>
+          <option value="Uthyrare">Uthyrare (hyr ut personal)</option>
+          <option value="Båda">Båda</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--border)">Kontaktperson</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Namn</label><input class="form-input" id="kkKontakt" placeholder="Anna Svensson"></div>
+      <div class="form-group"><label class="form-label">E-post</label><input class="form-input" id="kkEpost" type="email" placeholder="anna@..."></div>
+      <div class="form-group"><label class="form-label">Telefon</label><input class="form-input" id="kkTelefon" placeholder="07xx-xxx xxx"></div>
+    </div>
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--border)">Fakturauppgifter</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Faktura-e-post</label><input class="form-input" id="kkFakturaEpost" type="email" placeholder="faktura@..."></div>
+      <div class="form-group"><label class="form-label">Fakturaadress</label><input class="form-input" id="kkFakturaAdress" placeholder="Storgatan 1"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="form-group"><label class="form-label">Postnummer</label><input class="form-input" id="kkPostnr" placeholder="123 45"></div>
+      <div class="form-group"><label class="form-label">Ort</label><input class="form-input" id="kkOrt" placeholder="Stockholm"></div>
+    </div>
+    <input type="hidden" id="kkEditId">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('kundkortModal')">Avbryt</button>
+      <button class="btn btn-danger btn-sm" id="kkDeleteBtn" onclick="doDeleteKund()" style="display:none">🗑 Radera</button>
+      <button class="btn btn-primary" onclick="saveKundkort()">Spara</button>
+    </div>
+  </div>
 </div>
 
 <!-- AVTAL MODAL -->
@@ -1183,7 +1234,7 @@
     <!-- INHYRARE -->
     <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Inhyrare — hyr in personal</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
-      <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="aInhForetag" placeholder="Byggbolaget AB"></div>
+      <div class="form-group"><label class="form-label">Företag</label><div class="ac-wrap"><input class="form-input" id="aInhForetag" placeholder="Byggbolaget AB" oninput="acKund(this,'inh')" onblur="setTimeout(()=>closeAc('aInhAc'),200)" autocomplete="off"><div class="ac-dropdown" id="aInhAc" style="display:none"></div></div></div>
       <div class="form-group"><label class="form-label">Org.nr</label><input class="form-input" id="aInhOrgNr" placeholder="556xxx-xxxx"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
@@ -1195,7 +1246,7 @@
     <!-- UTHYRARE -->
     <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--accent2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Uthyrare — hyr ut personal</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
-      <div class="form-group"><label class="form-label">Företag</label><input class="form-input" id="aUthForetag" placeholder="Bemanningsbolaget AB"></div>
+      <div class="form-group"><label class="form-label">Företag</label><div class="ac-wrap"><input class="form-input" id="aUthForetag" placeholder="Bemanningsbolaget AB" oninput="acKund(this,'uth')" onblur="setTimeout(()=>closeAc('aUthAc'),200)" autocomplete="off"><div class="ac-dropdown" id="aUthAc" style="display:none"></div></div></div>
       <div class="form-group"><label class="form-label">Org.nr</label><input class="form-input" id="aUthOrgNr" placeholder="556xxx-xxxx"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
@@ -1447,6 +1498,7 @@ let calls = [];
 let fbPosts = [];
 let liKontakter = [];
 let kontroller = [];
+let kunder = [];
 let avtalList2 = [];
 let fakturorList = [];
 let affSub = 'kontroll';
@@ -1458,6 +1510,7 @@ let syncTimer = null;
 let lastSyncHash = '';
 
 function genId() { return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function saveKunder() { localStorage.setItem('crm_kunder_v1', JSON.stringify(kunder)); }
 
 // ─── SUPABASE API ────────────────────────────────────────
 let _sb = null;
@@ -1556,6 +1609,7 @@ async function sbDeleteLinkedinKontaktDb(id) {
 
 async function loadFromSupabase() {
   setStatus('syncing');
+  kunder = JSON.parse(localStorage.getItem('crm_kunder_v1') || '[]');
   try {
     const [c, cl, fb, li, kk, av, fak] = await Promise.all([sbGetContacts(), sbGetCalls(), sbGetFbPosts(), sbGetLinkedinKontakter(), sbGetKontroller(), sbGetAvtal2(), sbGetFakturor()]);
     contacts     = c || [];
@@ -2948,67 +3002,42 @@ function renderAffarer() {
 function renderKundregister() {
   const el = document.getElementById('kundregisterList');
   if (!el) return;
-  // Bygg kunder från avtal (inhyrare + uthyrare) och föreagskontroll
-  const kunder = {};
-  const addKund = (foretag, orgNr, kontakt, epost, telefon, roll, avtalId) => {
-    if (!foretag) return;
-    const key = (orgNr || foretag).toLowerCase();
-    if (!kunder[key]) kunder[key] = { foretag, orgNr, kontakt, epost, telefon, roller: [], avtalIds: [] };
-    if (roll && !kunder[key].roller.includes(roll)) kunder[key].roller.push(roll);
-    if (avtalId && !kunder[key].avtalIds.includes(avtalId)) kunder[key].avtalIds.push(avtalId);
-    if (!kunder[key].kontakt && kontakt) kunder[key].kontakt = kontakt;
-    if (!kunder[key].epost && epost) kunder[key].epost = epost;
-    if (!kunder[key].telefon && telefon) kunder[key].telefon = telefon;
-  };
-  avtalList2.forEach(a => {
-    addKund(a.inhyrare_foretag, a.inhyrare_org_nr, a.inhyrare_kontakt, a.inhyrare_epost, a.inhyrare_telefon, 'Inhyrare', a.id);
-    addKund(a.uthyrare_foretag, a.uthyrare_org_nr, a.uthyrare_kontakt, a.uthyrare_epost, a.uthyrare_telefon, 'Uthyrare', a.id);
-  });
-  kontroller.forEach(k => addKund(k.foretag, k.org_nr, null, null, null, null, null));
-  // Lägg även till contacts från localStorage som inte redan finns
-  contacts.forEach(c => {
-    if (!c.company) return;
-    const key = (c.org_nr || c.company).toLowerCase();
-    if (!kunder[key]) {
-      kunder[key] = { foretag: c.company, orgNr: c.org_nr||'', kontakt: c.name||'', epost: c.email||'', telefon: c.phone||'', roller: [], avtalIds: [] };
-    }
-  });
-  const list = Object.values(kunder).sort((a,b)=>a.foretag.localeCompare(b.foretag,'sv'));
-  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga kunder ännu — lägg till en kontakt eller ett avtal</div>'; return; }
+  const list = [...kunder].sort((a,b)=>a.foretag.localeCompare(b.foretag,'sv'));
+  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga kunder ännu — klicka "+ Lägg till kund" för att börja</div>'; return; }
   el.innerHTML = `<div style="display:grid;gap:12px">${list.map(k=>{
-    // Korsreferera mot contacts (localStorage) för kundnummer och extra info
-    const match = contacts.find(c => c.company && c.company.toLowerCase() === k.foretag.toLowerCase());
-    const kundnr = match?.kundnr || '';
-    const faktEpost = match?.faktura_epost || '';
-    const faktAdress = match?.faktura_adress || '';
-    const faktPostnr = match?.postnr || '';
-    const faktOrt = match?.ort || '';
-    const faktAdressFull = [faktAdress, [faktPostnr, faktOrt].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    // Räkna avtal kopplade till denna kund
+    const avtalCount = avtalList2.filter(a =>
+      (a.inhyrare_foretag||'').toLowerCase() === k.foretag.toLowerCase() ||
+      (a.uthyrare_foretag||'').toLowerCase() === k.foretag.toLowerCase()
+    ).length;
+    const rollColor = k.roll==='Inhyrare' ? 'rgba(37,99,235,0.1)' : k.roll==='Uthyrare' ? 'rgba(249,115,22,0.1)' : 'rgba(34,197,94,0.1)';
+    const rollText  = k.roll==='Inhyrare' ? 'var(--accent)' : k.roll==='Uthyrare' ? 'var(--orange)' : 'var(--green)';
+    const faktAdressFull = [k.fakturaAdress, [k.postnr, k.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ');
     return `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start">
       <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap">
           <div style="font-weight:700;font-size:15px">${k.foretag}</div>
-          ${kundnr?`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:rgba(37,99,235,0.1);border-radius:4px;padding:2px 8px">${kundnr}</span>`:''}
+          ${k.kundnr?`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:rgba(37,99,235,0.1);border-radius:4px;padding:2px 8px">${k.kundnr}</span>`:''}
+          ${k.roll?`<span style="font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:${rollColor};color:${rollText}">${k.roll}</span>`:''}
         </div>
         ${k.orgNr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">Org.nr: ${k.orgNr}</div>`:''}
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-          ${k.roller.map(r=>`<span style="font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:${r==='Inhyrare'?'rgba(37,99,235,0.1)':'rgba(249,115,22,0.1)'};color:${r==='Inhyrare'?'var(--accent)':'var(--orange)'}">${r}</span>`).join('')}
-        </div>
-        <div style="font-size:12px;color:var(--muted2);line-height:1.8">
+        <div style="font-size:12px;color:var(--muted2);line-height:1.9">
           ${k.kontakt?`👤 ${k.kontakt}<br>`:''}
           ${k.epost?`✉ <a href="mailto:${k.epost}" style="color:var(--accent)">${k.epost}</a><br>`:''}
-          ${faktEpost?`📧 Faktura: <a href="mailto:${faktEpost}" style="color:var(--accent)">${faktEpost}</a><br>`:''}
+          ${k.fakturaEpost?`📧 Faktura: <a href="mailto:${k.fakturaEpost}" style="color:var(--accent)">${k.fakturaEpost}</a><br>`:''}
           ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a><br>`:''}
           ${faktAdressFull?`🏠 ${faktAdressFull}`:''}
         </div>
       </div>
-      <div style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
-        ${k.avtalIds.length?`${k.avtalIds.length} avtal`:''}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        ${avtalCount?`<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${avtalCount} avtal</span>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="openKundkortModal('${k.id}')" style="font-size:11px">✏ Redigera</button>
       </div>
     </div>`;
   }).join('')}</div>`;
 }
+
 
 // ─── AFFÄRER: KONTROLL MODAL ─────────────────────────────
 function openKontrollModal(id) {
@@ -3476,6 +3505,100 @@ async function doDeleteFaktura(id) {
   renderAvtalCards();
   renderFakturaList();
   showToast('Faktura raderad');
+}
+
+// ─── KUNDKORT ────────────────────────────────────────────
+function openKundkortModal(id) {
+  const k = id ? kunder.find(x=>x.id===id) : null;
+  document.getElementById('kkForetag').value       = k?.foretag||'';
+  document.getElementById('kkOrgNr').value         = k?.orgNr||'';
+  document.getElementById('kkKundnr').value        = k?.kundnr||'';
+  document.getElementById('kkRoll').value          = k?.roll||'';
+  document.getElementById('kkKontakt').value       = k?.kontakt||'';
+  document.getElementById('kkEpost').value         = k?.epost||'';
+  document.getElementById('kkTelefon').value       = k?.telefon||'';
+  document.getElementById('kkFakturaEpost').value  = k?.fakturaEpost||'';
+  document.getElementById('kkFakturaAdress').value = k?.fakturaAdress||'';
+  document.getElementById('kkPostnr').value        = k?.postnr||'';
+  document.getElementById('kkOrt').value           = k?.ort||'';
+  document.getElementById('kkEditId').value        = k?.id||'';
+  document.getElementById('kkDeleteBtn').style.display = k ? '' : 'none';
+  document.getElementById('kundkortModal').classList.add('open');
+}
+
+function saveKundkort() {
+  const foretag = document.getElementById('kkForetag').value.trim();
+  if (!foretag) { showToast('Fyll i företagsnamn'); return; }
+  const id = document.getElementById('kkEditId').value || genId();
+  const row = {
+    id, foretag,
+    orgNr:         document.getElementById('kkOrgNr').value.trim(),
+    kundnr:        document.getElementById('kkKundnr').value.trim(),
+    roll:          document.getElementById('kkRoll').value,
+    kontakt:       document.getElementById('kkKontakt').value.trim(),
+    epost:         document.getElementById('kkEpost').value.trim(),
+    telefon:       document.getElementById('kkTelefon').value.trim(),
+    fakturaEpost:  document.getElementById('kkFakturaEpost').value.trim(),
+    fakturaAdress: document.getElementById('kkFakturaAdress').value.trim(),
+    postnr:        document.getElementById('kkPostnr').value.trim(),
+    ort:           document.getElementById('kkOrt').value.trim(),
+    createdAt:     Date.now()
+  };
+  const idx = kunder.findIndex(x=>x.id===id);
+  if (idx>=0) kunder[idx]=row; else kunder.push(row);
+  saveKunder();
+  closeModal('kundkortModal');
+  renderKundregister();
+  showToast('✓ Kund sparad');
+}
+
+function doDeleteKund() {
+  const id = document.getElementById('kkEditId').value;
+  if (!id || !confirm('Radera kunden från kundregistret?')) return;
+  kunder = kunder.filter(x=>x.id!==id);
+  saveKunder();
+  closeModal('kundkortModal');
+  renderKundregister();
+  showToast('Kund raderad');
+}
+
+// ─── AUTOCOMPLETE FÖR AVTAL ──────────────────────────────
+function acKund(input, side) {
+  const q = input.value.toLowerCase();
+  const acId = side === 'inh' ? 'aInhAc' : 'aUthAc';
+  const ac = document.getElementById(acId);
+  if (!q || q.length < 1) { ac.style.display = 'none'; return; }
+  const hits = kunder.filter(k => k.foretag.toLowerCase().includes(q)).slice(0, 8);
+  if (!hits.length) { ac.style.display = 'none'; return; }
+  ac.innerHTML = hits.map(k =>
+    `<div class="ac-item" onmousedown="fillKund('${k.id}','${side}')"><strong>${k.foretag}</strong><span>${k.orgNr||''}</span></div>`
+  ).join('');
+  ac.style.display = 'block';
+}
+
+function closeAc(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+function fillKund(id, side) {
+  const k = kunder.find(x=>x.id===id);
+  if (!k) return;
+  if (side === 'inh') {
+    document.getElementById('aInhForetag').value  = k.foretag;
+    document.getElementById('aInhOrgNr').value    = k.orgNr||'';
+    document.getElementById('aInhKontakt').value  = k.kontakt||'';
+    document.getElementById('aInhEpost').value    = k.epost||'';
+    document.getElementById('aInhTelefon').value  = k.telefon||'';
+    closeAc('aInhAc');
+  } else {
+    document.getElementById('aUthForetag').value  = k.foretag;
+    document.getElementById('aUthOrgNr').value    = k.orgNr||'';
+    document.getElementById('aUthKontakt').value  = k.kontakt||'';
+    document.getElementById('aUthEpost').value    = k.epost||'';
+    document.getElementById('aUthTelefon').value  = k.telefon||'';
+    closeAc('aUthAc');
+  }
 }
 
 // ─── INIT ───────────────────────────────────────────────
