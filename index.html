@@ -1438,6 +1438,7 @@
 </div>
 
 <!-- DETAIL PANEL -->
+<div id="detailBackdrop" onclick="closeDetail()" style="display:none;position:fixed;inset:0;z-index:49;background:rgba(0,0,0,0.18);"></div>
 <div class="detail-panel" id="detailPanel">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
     <div>
@@ -1996,6 +1997,7 @@ function openDetail(id) {
   const c = contacts.find(x => x.id === id);
   if (!c) return;
   currentContactId = id;
+  document.getElementById('detailBackdrop').style.display = 'block';
 
   document.getElementById('dpName').textContent = c.name || c.company;
   document.getElementById('dpCompany').textContent = c.company + (c.industry ? ' · ' + c.industry : '');
@@ -2045,6 +2047,7 @@ function openDetail(id) {
 
 function closeDetail() {
   document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('detailBackdrop').style.display = 'none';
   currentContactId = null;
 }
 
