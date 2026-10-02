@@ -819,6 +819,70 @@
       </div>
     </div>
 
+<!-- SOCIAL PAGE -->
+<div class="page" id="page-social">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+    <button class="btn btn-primary" onclick="openFbModal()">+ Nytt inlägg</button>
+    <div>
+      <div style="font-size:18px;font-weight:700">Social Media</div>
+      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">Dina inlägg i Facebook-grupper</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content">
+    <button class="fb-filter-btn active" onclick="filterFb('alla')" id="fbf-alla">Alla</button>
+    <button class="fb-filter-btn" onclick="filterFb('inhyrare')" id="fbf-inhyrare">Inhyrare</button>
+    <button class="fb-filter-btn" onclick="filterFb('uthyrare')" id="fbf-uthyrare">Uthyrare</button>
+  </div>
+  <div id="fbPostList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga inlägg registrerade ännu</div></div>
+</div>
+
+<!-- AFFÄRER PAGE -->
+<div class="page" id="page-affarer">
+  <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border)">
+    <button onclick="showAffSub('kontroll',this)" id="affBtn-kontroll" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px">Kontroll</button>
+    <button onclick="showAffSub('avtal',this)" id="affBtn-avtal" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted2);border-bottom:2px solid transparent;margin-bottom:-2px">Avtal</button>
+    <button onclick="showAffSub('faktura',this)" id="affBtn-faktura" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted2);border-bottom:2px solid transparent;margin-bottom:-2px">Fakturering</button>
+  </div>
+
+  <!-- KONTROLL -->
+  <div id="affSec-kontroll">
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700">Företagskontroll</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">ID · F-skatt · Försäkring · Skulder</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto">
+      <div id="kontrollList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
+    </div>
+  </div>
+
+  <!-- AVTAL -->
+  <div id="affSec-avtal" style="display:none">
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700">Avtal</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Inhyrare &amp; Uthyrare — avtal efter match</div>
+    </div>
+    <div id="faktureringsVarningar"></div>
+    <div id="avtalCards"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
+  </div>
+
+  <!-- FAKTURERING -->
+  <div id="affSec-faktura" style="display:none">
+    <div style="margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700">Fakturering</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Veckovis fakturering per uppdrag</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px" id="fakturaKpi"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+      <div id="fakturaList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- KUNDREGISTER PAGE -->
+<div class="page" id="page-kundregister">
+  <div id="kundregisterList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga kunder ännu — klicka "+ Lägg till kund" för att börja</div></div>
+</div>
+
   </div>
 </div>
 
@@ -1069,65 +1133,6 @@
   </div>
 </div>
 
-<!-- SOCIAL PAGE -->
-<div class="page" id="page-social">
-  <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-    <button class="btn btn-primary" onclick="openFbModal()">+ Nytt inlägg</button>
-    <div>
-      <div style="font-size:18px;font-weight:700">Social Media</div>
-      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">Dina inlägg i Facebook-grupper</div>
-    </div>
-  </div>
-  <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content">
-    <button class="fb-filter-btn active" onclick="filterFb('alla')" id="fbf-alla">Alla</button>
-    <button class="fb-filter-btn" onclick="filterFb('inhyrare')" id="fbf-inhyrare">Inhyrare</button>
-    <button class="fb-filter-btn" onclick="filterFb('uthyrare')" id="fbf-uthyrare">Uthyrare</button>
-  </div>
-  <div id="fbPostList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga inlägg registrerade ännu</div></div>
-</div>
-
-<!-- AFFÄRER PAGE -->
-<div class="page" id="page-affarer">
-  <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border)">
-    <button onclick="showAffSub('kontroll',this)" id="affBtn-kontroll" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px">Kontroll</button>
-    <button onclick="showAffSub('avtal',this)" id="affBtn-avtal" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted2);border-bottom:2px solid transparent;margin-bottom:-2px">Avtal</button>
-    <button onclick="showAffSub('faktura',this)" id="affBtn-faktura" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted2);border-bottom:2px solid transparent;margin-bottom:-2px">Fakturering</button>
-  </div>
-
-  <!-- KONTROLL -->
-  <div id="affSec-kontroll">
-    <div style="margin-bottom:16px">
-      <div style="font-size:16px;font-weight:700">Företagskontroll</div>
-      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">ID · F-skatt · Försäkring · Skulder</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto">
-      <div id="kontrollList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
-    </div>
-  </div>
-
-  <!-- AVTAL -->
-  <div id="affSec-avtal" style="display:none">
-    <div style="margin-bottom:16px">
-      <div style="font-size:16px;font-weight:700">Avtal</div>
-      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Inhyrare &amp; Uthyrare — avtal efter match</div>
-    </div>
-    <div id="faktureringsVarningar"></div>
-    <div id="avtalCards"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
-  </div>
-
-  <!-- FAKTURERING -->
-  <div id="affSec-faktura" style="display:none">
-    <div style="margin-bottom:20px">
-      <div style="font-size:16px;font-weight:700">Fakturering</div>
-      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Veckovis fakturering per uppdrag</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px" id="fakturaKpi"></div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
-      <div id="fakturaList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
-    </div>
-  </div>
-</div>
-
 <!-- KONTROLL MODAL -->
 <div class="modal-overlay" id="kontrollModal" onclick="if(event.target===this)closeModal('kontrollModal')">
   <div class="modal-box" style="max-width:520px">
@@ -1161,11 +1166,6 @@
       <button class="btn btn-primary" onclick="saveKontroll()">Spara</button>
     </div>
   </div>
-</div>
-
-<!-- KUNDREGISTER PAGE -->
-<div class="page" id="page-kundregister">
-  <div id="kundregisterList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga kunder ännu — klicka "+ Lägg till kund" för att börja</div></div>
 </div>
 
 <!-- KUNDKORT MODAL -->
