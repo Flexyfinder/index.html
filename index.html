@@ -673,7 +673,7 @@
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" id="pageTitle">Översikt</div>
-    <div class="topbar-actions">
+    <div class="topbar-actions" id="topbarActions">
       <input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">
       <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>
       <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>
@@ -1168,10 +1168,6 @@
 
 <!-- KUNDREGISTER PAGE -->
 <div class="page" id="page-kundregister">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Kundregister — källdata för avtal och matchningar</div>
-    <button class="btn btn-primary" onclick="openKundkortModal(null)">+ Lägg till kund</button>
-  </div>
   <div id="kundregisterList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Inga kunder ännu — klicka "+ Lägg till kund" för att börja</div></div>
 </div>
 
@@ -1694,7 +1690,23 @@ function showPage(id, el) {
   el.classList.add('active');
   const titles = { dashboard: 'Översikt', contacts: 'Kontakter', calls: 'Samtalslogg', followups: 'Uppföljningar', social: 'Social Media', affarer: 'Affärer', kundregister: 'Kundregister' };
   document.getElementById('pageTitle').textContent = titles[id];
+  updateTopbar(id);
   renderAll();
+}
+
+function updateTopbar(id) {
+  const actions = document.getElementById('topbarActions');
+  if (!actions) return;
+  if (id === 'kundregister') {
+    actions.innerHTML = `
+      <input class="search-box" type="text" placeholder="Sök kunder..." id="globalSearch" oninput="handleSearch(this.value)">
+      <button class="btn btn-primary" onclick="openKundkortModal(null)">+ Lägg till kund</button>`;
+  } else {
+    actions.innerHTML = `
+      <input class="search-box" type="text" placeholder="Sök kontakter..." id="globalSearch" oninput="handleSearch(this.value)">
+      <button class="btn btn-ghost" onclick="openImportModal()">⬆ Importera CSV</button>
+      <button class="btn btn-primary" onclick="openAddContact()">+ Lägg till kontakt</button>`;
+  }
 }
 
 // ─── RENDER ─────────────────────────────────────────────
