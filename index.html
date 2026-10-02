@@ -1068,12 +1068,12 @@
 
 <!-- SOCIAL PAGE -->
 <div class="page" id="page-social">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+    <button class="btn btn-primary" onclick="openFbModal()">+ Nytt inlägg</button>
     <div>
       <div style="font-size:18px;font-weight:700">Social Media</div>
       <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">Dina inlägg i Facebook-grupper</div>
     </div>
-    <button class="btn btn-primary" onclick="openFbModal()">+ Nytt inlägg</button>
   </div>
   <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content">
     <button class="fb-filter-btn active" onclick="filterFb('alla')" id="fbf-alla">Alla</button>
@@ -1093,12 +1093,12 @@
 
   <!-- KONTROLL -->
   <div id="affSec-kontroll">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="openKontrollModal(null)">+ Ny kontroll</button>
       <div>
         <div style="font-size:16px;font-weight:700">Företagskontroll</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">ID · F-skatt · Försäkring · Skulder</div>
       </div>
-      <button class="btn btn-primary" onclick="openKontrollModal(null)">+ Ny kontroll</button>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto">
       <div id="kontrollList"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
@@ -2661,11 +2661,11 @@ function renderFbPosts() {
   el.innerHTML = sorted.map(p => `
     <div class="fb-post-row">
       <div class="fb-post-meta">
+        <button class="btn btn-ghost btn-sm" onclick="openFbModal('${p.id}')" style="font-size:10px;padding:2px 8px">✏ Redigera</button>
         <span>${p.date || '—'}</span>
         <span class="${p.type === 'inhyrare' ? 'fb-type-in' : 'fb-type-ut'}">${p.type === 'inhyrare' ? 'Inhyrare' : 'Uthyrare'}</span>
         <span>${p.group || '—'}</span>
         ${p.responses ? `<span style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace">💬 ${p.responses} svar</span>` : ''}
-        <button class="btn btn-ghost btn-sm" onclick="openFbModal('${p.id}')" style="margin-left:auto;font-size:10px;padding:2px 8px">✏ Redigera</button>
       </div>
       <div class="fb-post-text">${p.text || ''}</div>
     </div>
@@ -3026,25 +3026,21 @@ function renderKundregister() {
     const rollText  = k.roll==='Inhyrare' ? 'var(--accent)' : k.roll==='Uthyrare' ? 'var(--orange)' : 'var(--green)';
     const faktAdressFull = [k.fakturaAdress, [k.postnr, k.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ');
     return `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start">
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap">
-          <div style="font-weight:700;font-size:15px">${k.foretag}</div>
-          ${k.kundnr?`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:rgba(37,99,235,0.1);border-radius:4px;padding:2px 8px">${k.kundnr}</span>`:''}
-          ${k.roll?`<span style="font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:${rollColor};color:${rollText}">${k.roll}</span>`:''}
-        </div>
-        ${k.orgNr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">Org.nr: ${k.orgNr}</div>`:''}
-        <div style="font-size:12px;color:var(--muted2);line-height:1.9">
-          ${k.kontakt?`👤 ${k.kontakt}<br>`:''}
-          ${k.epost?`✉ <a href="mailto:${k.epost}" style="color:var(--accent)">${k.epost}</a><br>`:''}
-          ${k.fakturaEpost?`📧 Faktura: <a href="mailto:${k.fakturaEpost}" style="color:var(--accent)">${k.fakturaEpost}</a><br>`:''}
-          ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a><br>`:''}
-          ${faktAdressFull?`🏠 ${faktAdressFull}`:''}
-        </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="openKundkortModal('${k.id}')" style="font-size:11px;padding:3px 10px">✏ Redigera</button>
+        <div style="font-weight:700;font-size:15px">${k.foretag}</div>
+        ${k.kundnr?`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:rgba(37,99,235,0.1);border-radius:4px;padding:2px 8px">${k.kundnr}</span>`:''}
+        ${k.roll?`<span style="font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:${rollColor};color:${rollText}">${k.roll}</span>`:''}
+        ${avtalCount?`<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto">${avtalCount} avtal</span>`:''}
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-        ${avtalCount?`<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${avtalCount} avtal</span>`:''}
-        <button class="btn btn-ghost btn-sm" onclick="openKundkortModal('${k.id}')" style="font-size:11px">✏ Redigera</button>
+      ${k.orgNr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">Org.nr: ${k.orgNr}</div>`:''}
+      <div style="font-size:12px;color:var(--muted2);line-height:1.9">
+        ${k.kontakt?`👤 ${k.kontakt}<br>`:''}
+        ${k.epost?`✉ <a href="mailto:${k.epost}" style="color:var(--accent)">${k.epost}</a><br>`:''}
+        ${k.fakturaEpost?`📧 Faktura: <a href="mailto:${k.fakturaEpost}" style="color:var(--accent)">${k.fakturaEpost}</a><br>`:''}
+        ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a><br>`:''}
+        ${faktAdressFull?`🏠 ${faktAdressFull}`:''}
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -3520,11 +3516,16 @@ async function doDeleteFaktura(id) {
 }
 
 // ─── KUNDKORT ────────────────────────────────────────────
+function nextKundnummer() {
+  const nums = kunder.map(k => parseInt((k.kundnr||'').replace(/\D/g,''))).filter(n => !isNaN(n) && n > 0);
+  return String(nums.length ? Math.max(...nums) + 1 : 100);
+}
+
 function openKundkortModal(id) {
   const k = id ? kunder.find(x=>x.id===id) : null;
   document.getElementById('kkForetag').value       = k?.foretag||'';
   document.getElementById('kkOrgNr').value         = k?.orgNr||'';
-  document.getElementById('kkKundnr').value        = k?.kundnr||'';
+  document.getElementById('kkKundnr').value        = k?.kundnr || (!id ? nextKundnummer() : '');
   document.getElementById('kkRoll').value          = k?.roll||'';
   document.getElementById('kkKontakt').value       = k?.kontakt||'';
   document.getElementById('kkEpost').value         = k?.epost||'';
