@@ -821,50 +821,70 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Company Name *</label>
+        <label class="form-label">Företag *</label>
         <input class="form-input" id="fCompany" placeholder="Acme AB">
       </div>
       <div class="form-group">
-        <label class="form-label">Contact Name</label>
-        <input class="form-input" id="fName" placeholder="Anna Lindgren">
+        <label class="form-label">Org.nr</label>
+        <input class="form-input" id="fOrgNr" placeholder="556xxx-xxxx">
+      </div>
+      <div class="form-group" style="max-width:120px">
+        <label class="form-label">Kundnummer</label>
+        <input class="form-input" id="fKundnr" placeholder="Auto" readonly style="background:var(--surface2);color:var(--accent);font-weight:700;font-family:'DM Mono',monospace">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input class="form-input" id="fPhone" placeholder="070-123 45 67">
+        <label class="form-label">Kontaktperson</label>
+        <input class="form-input" id="fName" placeholder="Anna Lindgren">
       </div>
       <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="fEmail" placeholder="anna@acme.se">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" id="fPhone" placeholder="070-123 45 67">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">E-post</label>
+        <input class="form-input" id="fEmail" type="email" placeholder="anna@acme.se">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-post för faktura</label>
+        <input class="form-input" id="fFakturaEpost" type="email" placeholder="faktura@acme.se">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fakturaadress</label>
+        <input class="form-input" id="fFakturaAdress" placeholder="Storgatan 1, 123 45 Stockholm">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bransch</label>
+        <input class="form-input" id="fIndustry" placeholder="Bygg, El, VVS...">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-select" id="fStatus">
-          <option value="not called">Not Called</option>
-          <option value="called">Called</option>
-          <option value="not answered">Not Answered</option>
-          <option value="interested">Interested</option>
-          <option value="follow-up">Follow-up</option>
-          <option value="not interested">Not Interested</option>
-          <option value="closed">Closed</option>
+          <option value="not called">Ej kontaktad</option>
+          <option value="called">Kontaktad</option>
+          <option value="not answered">Svarade ej</option>
+          <option value="interested">Intresserad</option>
+          <option value="follow-up">Uppföljning</option>
+          <option value="not interested">Ej intresserad</option>
+          <option value="closed">Avslutad</option>
         </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Industry</label>
-        <input class="form-input" id="fIndustry" placeholder="Construction, IT, etc.">
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Notes</label>
-      <textarea class="form-textarea" id="fNotes" placeholder="Any info about this company..."></textarea>
+      <label class="form-label">Anteckningar</label>
+      <textarea class="form-textarea" id="fNotes" placeholder="Info om företaget..."></textarea>
     </div>
     <input type="hidden" id="fEditId">
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('contactModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveContact()">Save Contact</button>
+      <button class="btn btn-ghost" onclick="closeModal('contactModal')">Avbryt</button>
+      <button class="btn btn-primary" onclick="saveContact()">Spara kontakt</button>
     </div>
   </div>
 </div>
@@ -1091,6 +1111,7 @@
       </div>
       <button class="btn btn-primary" onclick="openAvtalModal(null)">+ Nytt avtal</button>
     </div>
+    <div id="faktureringsVarningar"></div>
     <div id="avtalCards"><div style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;padding:20px 0">Laddar...</div></div>
   </div>
 
@@ -1971,12 +1992,24 @@ function deleteCurrentContact() {
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+function nextKundNr() {
+  const max = contacts.reduce((m,c) => {
+    const n = parseInt((c.kundnr||'').replace('K-','')) || 0;
+    return Math.max(m, n);
+  }, 0);
+  return 'K-' + String(max + 1).padStart(3, '0');
+}
+
 function openAddContact() {
-  document.getElementById('contactModalTitle').textContent = 'Add Contact';
+  document.getElementById('contactModalTitle').textContent = 'Lägg till kontakt';
   document.getElementById('fCompany').value = '';
+  document.getElementById('fOrgNr').value = '';
+  document.getElementById('fKundnr').value = nextKundNr();
   document.getElementById('fName').value = '';
   document.getElementById('fPhone').value = '';
   document.getElementById('fEmail').value = '';
+  document.getElementById('fFakturaEpost').value = '';
+  document.getElementById('fFakturaAdress').value = '';
   document.getElementById('fStatus').value = 'not called';
   document.getElementById('fIndustry').value = '';
   document.getElementById('fNotes').value = '';
@@ -1987,11 +2020,15 @@ function openAddContact() {
 function openEditContact(id) {
   const c = contacts.find(x => x.id === id);
   if (!c) return;
-  document.getElementById('contactModalTitle').textContent = 'Edit Contact';
+  document.getElementById('contactModalTitle').textContent = 'Redigera kontakt';
   document.getElementById('fCompany').value = c.company || '';
+  document.getElementById('fOrgNr').value = c.org_nr || '';
+  document.getElementById('fKundnr').value = c.kundnr || nextKundNr();
   document.getElementById('fName').value = c.name || '';
   document.getElementById('fPhone').value = c.phone || '';
   document.getElementById('fEmail').value = c.email || '';
+  document.getElementById('fFakturaEpost').value = c.faktura_epost || '';
+  document.getElementById('fFakturaAdress').value = c.faktura_adress || '';
   document.getElementById('fStatus').value = c.status || 'not called';
   document.getElementById('fIndustry').value = c.industry || '';
   document.getElementById('fNotes').value = c.notes || '';
@@ -2005,9 +2042,13 @@ function saveContact() {
   const editId = document.getElementById('fEditId').value;
   const data = {
     company,
+    org_nr: document.getElementById('fOrgNr').value.trim(),
+    kundnr: document.getElementById('fKundnr').value.trim(),
     name: document.getElementById('fName').value.trim(),
     phone: document.getElementById('fPhone').value.trim(),
     email: document.getElementById('fEmail').value.trim(),
+    faktura_epost: document.getElementById('fFakturaEpost').value.trim(),
+    faktura_adress: document.getElementById('fFakturaAdress').value.trim(),
     status: document.getElementById('fStatus').value,
     industry: document.getElementById('fIndustry').value.trim(),
     notes: document.getElementById('fNotes').value.trim(),
@@ -2739,7 +2780,13 @@ function renderAvtalCards() {
     const moms = avgift * 0.25;
     const inhForetag = a.inhyrare_foretag || a.foretag || '–';
     const uthForetag = a.uthyrare_foretag || '–';
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px">
+    // Faktureringsvarning-badge
+    const todayMs = new Date(); todayMs.setHours(0,0,0,0);
+    const periodEndDiff = a.period_end ? Math.round((new Date(a.period_end).setHours(0,0,0,0) - todayMs) / 86400000) : null;
+    const varningBadge = (periodEndDiff !== null && periodEndDiff >= 0 && periodEndDiff <= 7)
+      ? `<span style="background:rgba(239,68,68,0.12);color:#ef4444;font-size:10px;font-family:'DM Mono',monospace;font-weight:700;border-radius:4px;padding:2px 7px;border:1px solid rgba(239,68,68,0.3)">🔔 ${periodEndDiff===0?'Sista dag idag':'Sista dag om '+periodEndDiff+' dag'+(periodEndDiff>1?'ar':'')}</span>`
+      : '';
+    return `<div style="background:var(--surface);border:1px solid ${(periodEndDiff !== null && periodEndDiff >= 0 && periodEndDiff <= 7)?'rgba(239,68,68,0.35)':'var(--border)'};border-radius:10px;padding:18px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
         <div>
           ${a.match_id?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:4px">MATCH ${a.match_id}</div>`:''}
@@ -2765,12 +2812,10 @@ function renderAvtalCards() {
           ${a.uthyrare_kontakt?`<div style="color:var(--muted2)">${a.uthyrare_kontakt}</div>`:''}
         </div>
       </div>
-      ${a.period_start?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-bottom:8px">
-        📅 <strong style="color:var(--text)">${a.period_start}</strong> → <strong style="color:var(--text)">${a.period_end||'–'}</strong>
-        ${a.arbetstid?' · '+a.arbetstid:''}
-        ${timmar?' · '+timmar+' timmar':''}
-        ${a.arbetsplats?' · '+a.arbetsplats:''}
-        ${a.faktureringsmodell?` · <span style="background:rgba(99,102,241,0.12);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:10px;letter-spacing:0.5px">${a.faktureringsmodell}</span>`:''}
+      ${a.period_start?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+        <span>📅 <strong style="color:var(--text)">${a.period_start}</strong> → <strong style="color:var(--text)">${a.period_end||'–'}</strong>${a.arbetstid?' · '+a.arbetstid:''}${timmar?' · '+timmar+' timmar':''}${a.arbetsplats?' · '+a.arbetsplats:''}</span>
+        ${a.faktureringsmodell?`<span style="background:rgba(99,102,241,0.12);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:10px;letter-spacing:0.5px">${a.faktureringsmodell}</span>`:''}
+        ${varningBadge}
       </div>`:''}
       ${(uppdrags>0||ffFakturerat>0)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div style="padding:10px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-family:'DM Mono',monospace;font-size:11px">
@@ -2861,10 +2906,38 @@ function renderFakturaList() {
   }).join('');
 }
 
+function checkFaktureringsVarningar() {
+  const el = document.getElementById('faktureringsVarningar');
+  if (!el) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const varningar = avtalList2.filter(a => {
+    if (!a.period_end) return false;
+    const pe = new Date(a.period_end); pe.setHours(0,0,0,0);
+    const diff = Math.round((pe - today) / 86400000);
+    return diff >= 0 && diff <= 7;
+  });
+  if (!varningar.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:14px;margin-bottom:16px;font-family:'DM Mono',monospace;font-size:12px">
+    <div style="color:#ef4444;font-weight:700;margin-bottom:8px">🔔 Faktureringsnotis — sista faktureringsdag inom 7 dagar</div>
+    ${varningar.map(a => {
+      const pe = new Date(a.period_end); pe.setHours(0,0,0,0);
+      const diff = Math.round((pe - today) / 86400000);
+      const label = diff === 0 ? '<span style="color:#ef4444;font-weight:700">IDAG</span>' : `<span style="color:#f97316">om ${diff} dag${diff>1?'ar':''}</span>`;
+      const uth = a.uthyrare_foretag || '–';
+      const inh = a.inhyrare_foretag || a.foretag || '–';
+      return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(239,68,68,0.15)">
+        <span>${inh} → ${uth}${a.match_id?' <span style="color:var(--muted)">(Match '+a.match_id+')</span>':''}</span>
+        <span>Slutdatum: <strong>${a.period_end}</strong> · ${label}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
 function renderAffarer() {
   renderKontroller();
   renderAvtalCards();
   renderFakturaList();
+  checkFaktureringsVarningar();
 }
 
 // ─── KUNDREGISTER ────────────────────────────────────────
@@ -2890,10 +2963,19 @@ function renderKundregister() {
   kontroller.forEach(k => addKund(k.foretag, k.org_nr, null, null, null, null, null));
   const list = Object.values(kunder).sort((a,b)=>a.foretag.localeCompare(b.foretag,'sv'));
   if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;font-family:\'DM Mono\',monospace;padding:20px 0">Inga kunder ännu — lägg till avtal under Affärer</div>'; return; }
-  el.innerHTML = `<div style="display:grid;gap:12px">${list.map(k=>`
+  el.innerHTML = `<div style="display:grid;gap:12px">${list.map(k=>{
+    // Korsreferera mot contacts (localStorage) för kundnummer och extra info
+    const match = contacts.find(c => c.company && c.company.toLowerCase() === k.foretag.toLowerCase());
+    const kundnr = match?.kundnr || '';
+    const faktEpost = match?.faktura_epost || '';
+    const faktAdress = match?.faktura_adress || '';
+    return `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start">
       <div>
-        <div style="font-weight:700;font-size:15px;margin-bottom:4px">${k.foretag}</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div style="font-weight:700;font-size:15px">${k.foretag}</div>
+          ${kundnr?`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:rgba(37,99,235,0.1);border-radius:4px;padding:2px 8px">${kundnr}</span>`:''}
+        </div>
         ${k.orgNr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">Org.nr: ${k.orgNr}</div>`:''}
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
           ${k.roller.map(r=>`<span style="font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:${r==='Inhyrare'?'rgba(37,99,235,0.1)':'rgba(249,115,22,0.1)'};color:${r==='Inhyrare'?'var(--accent)':'var(--orange)'}">${r}</span>`).join('')}
@@ -2901,13 +2983,16 @@ function renderKundregister() {
         <div style="font-size:12px;color:var(--muted2);line-height:1.8">
           ${k.kontakt?`👤 ${k.kontakt}<br>`:''}
           ${k.epost?`✉ <a href="mailto:${k.epost}" style="color:var(--accent)">${k.epost}</a><br>`:''}
-          ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a>`:''}
+          ${faktEpost?`📧 Faktura: <a href="mailto:${faktEpost}" style="color:var(--accent)">${faktEpost}</a><br>`:''}
+          ${k.telefon?`📞 <a href="tel:${k.telefon}" style="color:var(--accent)">${k.telefon}</a><br>`:''}
+          ${faktAdress?`🏠 ${faktAdress}`:''}
         </div>
       </div>
       <div style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">
         ${k.avtalIds.length?`${k.avtalIds.length} avtal`:''}
       </div>
-    </div>`).join('')}</div>`;
+    </div>`;
+  }).join('')}</div>`;
 }
 
 // ─── AFFÄRER: KONTROLL MODAL ─────────────────────────────
